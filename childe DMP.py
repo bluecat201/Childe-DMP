@@ -2,11 +2,23 @@ import discord
 import random
 import logging
 import os
+from dislash import slash_commands
+from dislash.interactions import *
 from discord.ext import commands,tasks
 from discord.ext.commands import has_permissions, CheckFailure
 
+custom_prefixes = {}
+default_prefixes = ['!']
+
+async def determine_prefix(bot, message):
+    guild = message.guild
+    if guild:
+        return custom_prefixes.get(guild.id, default_prefixes)
+    else:
+        return default_prefixes
+
 intents = discord.Intents(messages=True, guilds=True, members=True)
-bot = commands.Bot(command_prefix='!') #prefix bota
+bot = commands.Bot(command_prefix = determine_prefix) #prefix bota
 
 
 logging.basicConfig(level=logging.WARNING)
@@ -16,10 +28,18 @@ TOKEN = 'ODgzMzI1ODY1NDc0MjY5MTky.YTITUQ.7Wh0Vp6DG_V7ecGRDDPPkPVbYYM'
 #Přihlášení do bota
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Streaming(name='Alpha v0.0.9', url='https://www.twitch.tv/Bluecat201')) #status bota   
+    await bot.change_presence(activity=discord.Streaming(name='Beta v0.1.0', url='https://www.twitch.tv/Bluecat201')) #status bota   
     print('Connected to bot: {}'.format(bot.user.name))
     print('Bot ID: {}'.format(bot.user.id))
 
+#Nastavení prefixu
+@bot.command(aliases=['Setprefix','SETPREFIX'],brief = "Nastaví prefix bota", help="Nastaví prefix bota, co víc k tomu chceš vědět?")
+@commands.guild_only()
+async def setprefix(ctx, *, prefixes=""):
+    custom_prefix[ctx.guild.id] = prefixes.split() or default_prefixes
+    await ctx.send("Prefix nastaven!")
+
+        
 #invite bota
 @bot.command(aliases=['Invite','INVITE'], brief="Invite na bota.", help="Pošle invite, díky kterému si bota můžete přidat k sobě na server")
 async def invite(ctx):
@@ -37,7 +57,7 @@ async def twitch(ctx):
 
 #mluevení za bota
 @commands.has_guild_permissions(manage_messages=True)
-@bot.command(brief="Mluvení za bota", help="Za command napíšeš co chceš aby napsal bot a on to napíše")
+@bot.command(aliases=['Sudo','SUDO'],brief="Mluvení za bota", help="Za command napíšeš co chceš aby napsal bot a on to napíše")
 async def sudo(ctx, *, arg):
     await ctx.send(arg)
     await ctx.message.delete()
@@ -47,7 +67,6 @@ async def sudo(ctx, *, arg):
 async def sudo_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Spravovat zprávy**.")
-
 
 #d
 @bot.command()
@@ -94,12 +113,12 @@ async def bluecat(ctx):
 #info
 @bot.command(aliases=['Info','INFO'], brief="Info o botu", help="Vypíše informace o botovi")
 async def info(ctx):
-    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nPlánované datum vydání první beta verze: ||20-26.9.2021||\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogrogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Alpha 0.0.9 \nOwner: 𝕭𝖑𝖚𝖊𝖈𝖆𝖙#0406")
+    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogrogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Alpha 0.0.9 \nOwner: 𝕭𝖑𝖚𝖊𝖈𝖆𝖙#0406")
 
 #latence
-@bot.command(brief="Pong", help="Vypíše latency bota")
+@bot.command(aliases=['Ping','PING'],brief="Pong", help="Vypíše latency bota")
 async def ping(ctx):
-    await ctx.send('Pong! {0}s'.format(round(bot.latency, 1)))
+    await ctx.send('Pong! {0}ms'.format(round(bot.latency, 1)))
     
 #hug
 @bot.command(aliases=['Hug','HUG'],help="Náhodný gif hug s pingem dané osoby",brief="Hug gif, pro někoho")
@@ -312,7 +331,7 @@ async def hug(ctx,member : discord.User = None):
         
         
 #Kick
-@bot.command(aliases=['Kick','KICK','KİCK'], brief="Kick uživatele", help="Vyhodí zmíněného uživatele ze serveru. Pouze pro lidi s právem vyhodit uživatele")
+@bot.command(aliases=['Kick','KICK'], brief="Kick uživatele", help="Vyhodí zmíněného uživatele ze serveru. Pouze pro lidi s právem vyhodit uživatele")
 @commands.has_permissions(kick_members=True) #oprávnění na kick?
 async def kick(ctx, member : discord.Member, *, reason=None):
     await member.kick(reason=reason)
