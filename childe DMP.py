@@ -23,7 +23,7 @@ slash = SlashCommand(bot, sync_commands=True)
 
 
 logging.basicConfig(level=logging.INFO)
-TOKEN = 'ODgzMzI1ODY1NDc0MjY5MTky.YTITUQ.seTTHTfygU_1ub1dLdUijbvPA_M'
+TOKEN = ''
 
 #kámen, nůžky, papír
 @slash.slash(
@@ -118,20 +118,19 @@ async def on_ready():
     print('Connected to bot: {}'.format(bot.user.name))
     print('Bot ID: {}'.format(bot.user.id))
 
-#test embedu
-@bot.command()
-async def embed(ctx):
-    embed=discord.Embed(title=f"{ctx.author.mention} objímá {member.mention}", color=0xFFFF00)
-    embed.set_image(url="https://c.tenor.com/9e1aE_xBLCsAAAAC/anime-hug.gif")
-    await ctx.send(embed=embed)
-
 #Nastavení prefixu
+@commands.has_guild_permissions(administrator=True)
 @bot.command(aliases=['Setprefix','SETPREFIX'],brief = "Nastaví prefix bota", help="Nastaví prefix bota, co víc k tomu chceš vědět?")
 @commands.guild_only()
 async def setprefix(ctx, *, prefixes=""):
     custom_prefix[ctx.guild.id] = prefixes.split() or default_prefixes
     await ctx.send("Prefix nastaven!")
 
+#nemá oprávnění na setprefix
+@setprefix.error
+async def sudo_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Administrator**.")
         
 #invite bota
 @bot.command(aliases=['Invite','INVITE'], brief="Invite na bota.", help="Pošle invite, díky kterému si bota můžete přidat k sobě na server")
@@ -149,7 +148,7 @@ async def twitch(ctx):
     await ctx.send("Zde je twitch mého stvořitele: https://www.twitch.tv/bluecat201")
 
 #mluevení za bota
-@commands.has_guild_permissions(manage_messages=True)
+@commands.has_guild_permissions(administrator=True)
 @bot.command(aliases=['Sudo','SUDO'],brief="Mluvení za bota", help="Za command napíšeš co chceš aby napsal bot a on to napíše")
 async def sudo(ctx, *, arg):
     await ctx.send(arg)
@@ -159,7 +158,7 @@ async def sudo(ctx, *, arg):
 @sudo.error
 async def sudo_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
-        await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Spravovat zprávy**.")
+        await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Administrator**.")
 
 #d
 @bot.command()
@@ -170,7 +169,7 @@ async def d(ctx):
 #bluecat
 @bot.command(aliases=['Bluecat','BLUECAT'],help='Pošle náhodný gif modré kočky', brief='Bluecat gif')
 async def bluecat(ctx):
-    nah = random.randrange(15)
+    nah = random.randint(0,14)
     if nah == 0:
         await ctx.channel.send('https://tenor.com/view/blue-cat-wo-gif-21442488')
     elif nah == 1:
@@ -219,7 +218,7 @@ async def hug(ctx,member : discord.User = None):
     if member is None:
         await ctx.send('Musíš někoho označit/zadat ID')
     else:
-        nah = random.randrange(100)
+        nah = random.randint(0,99)
         await ctx.message.delete()
         embed=discord.Embed(description=f"{ctx.author.mention} objímá {member.mention}", color=0xFFFF00)
         if nah == 0:
