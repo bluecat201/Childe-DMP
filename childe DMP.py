@@ -169,37 +169,68 @@ async def d(ctx):
 #bluecat
 @bot.command(aliases=['Bluecat','BLUECAT'],help='Pošle náhodný gif modré kočky', brief='Bluecat gif')
 async def bluecat(ctx):
-    nah = random.randint(0,14)
+    nah = random.randint(0,19)
+    embed=discord.Embed(color=0x0B0B45)
     if nah == 0:
-        await ctx.channel.send('https://tenor.com/view/blue-cat-wo-gif-21442488')
+        embed.set_image(url="https://c.tenor.com/fORGSJaP4GwAAAAC/blue-cat-wo.gif")
+        await ctx.send(embed=embed)
     elif nah == 1:
-        await ctx.channel.send('https://tenor.com/view/bluecat-cute-cute-cartoon-playing-gif-13607070')
+        embed.set_image(url="https://c.tenor.com/bSleCKyyveEAAAAC/bluecat-cute.gif")
+        await ctx.send(embed=embed)
     elif nah == 2:
-        await ctx.channel.send('https://tenor.com/view/blue-bugcat-capoo-cat-cant-reach-gif-14132398')
+        embed.set_image(url="https://c.tenor.com/D0aN1jITREUAAAAC/blue-bugcat.gif")
+        await ctx.send(embed=embed)
     elif nah == 3:
-        await ctx.channel.send('https://tenor.com/view/bonnejournee-hello-ok-gif-20245217')
+        embed.set_image(url="https://c.tenor.com/J8Sz2t6XwzUAAAAC/bonnejournee-hello.gif")
+        await ctx.send(embed=embed)
     elif nah == 4:
-        await ctx.channel.send('https://tenor.com/view/blue-cat-bug-cat-capoo-no-i-dont-like-gif-14132390')
+        embed.set_image(url="https://c.tenor.com/vadBPwveI50AAAAC/blue-cat-bug-cat-capoo.gif")
+        await ctx.send(embed=embed)
     elif nah == 5:
-        await ctx.channel.send('https://tenor.com/view/crazy-blue-cat-cat-toilet-paper-nuts-tissue-gif-16005330')
+        embed.set_image(url="https://c.tenor.com/3l8Zk8liuWMAAAAC/crazy-blue-cat-cat.gif")
+        await ctx.send(embed=embed)
     elif nah == 6:
-        await ctx.channel.send('https://tenor.com/view/crazy-blue-cat-cat-high-five-good-job-gif-16005331')
+        embed.set_image(url="https://c.tenor.com/l73iIUVPxo8AAAAC/crazy-blue-cat-cat.gif")
+        await ctx.send(embed=embed)
     elif nah == 7:
-        await ctx.channel.send('https://tenor.com/view/cat-crazy-blue-cat-rest-chill-gif-15931350')
+        embed.set_image(url="https://c.tenor.com/Zu1bfl2DtZEAAAAC/cat-crazy-blue-cat.gif")
+        await ctx.send(embed=embed)
     elif nah == 8:
-        await ctx.channel.send('https://tenor.com/view/wiggle-random-blue-cat-dance-body-rolls-gif-16721254')
+        embed.set_image(url="https://c.tenor.com/2NzI0HjUdVoAAAAC/wiggle-random.gif")
+        await ctx.send(embed=embed)
     elif nah == 9:
-        await ctx.channel.send('https://tenor.com/view/cat-crazy-blue-cat-money-mine-dont-touch-gif-15942487')
+        embed.set_image(url="https://c.tenor.com/XNGhq50aZ4cAAAAC/cat-crazy-blue-cat.gif")
+        await ctx.send(embed=embed)
     elif nah == 10:
-        await ctx.channel.send('https://tenor.com/view/cat-crazt-blue-cat-work-computer-notebook-gif-16038891')
+        embed.set_image(url="https://c.tenor.com/XiS-MmoQvCMAAAAC/cat-crazt-blue-cat.gif")
+        await ctx.send(embed=embed)
     elif nah == 11:
-        await ctx.channel.send('https://tenor.com/view/blue-cat-bugcat-capoo-sleep-time-gif-14132347')
+        embed.set_image(url="https://c.tenor.com/cpteQxT2mIAAAAAC/blue-cat.gif")
+        await ctx.send(embed=embed)
     elif nah == 12:
-        await ctx.channel.send('https://tenor.com/view/blue-cat-bugcat-capoo-writing-gif-14132351')
+        embed.set_image(url="https://c.tenor.com/94ZDYicBkrEAAAAC/blue-cat.gif")
+        await ctx.send(embed=embed)
     elif nah == 13:
-        await ctx.channel.send('https://tenor.com/view/bugcat-bugcatsticker-excited-gif-12962907')
+        embed.set_image(url="https://c.tenor.com/mRSz5lJbtW0AAAAC/bugcat-bugcatsticker.gif")
+        await ctx.send(embed=embed)
     elif nah == 14:
-        await ctx.channel.send('https://tenor.com/view/blue-bugcat-capoo-cat-cellphone-gif-14132395')
+        embed.set_image(url="https://c.tenor.com/JGFWu0GIcDsAAAAC/blue-bugcat.gif")
+        await ctx.send(embed=embed)
+    elif nah == 15:
+        embed.set_image(url="https://c.tenor.com/6bpYwINwasQAAAAC/capoo-bugcat-capoo.gif")
+        await ctx.send(embed=embed)
+    elif nah == 16:
+        embed.set_image(url="https://c.tenor.com/feJE-gpuuyMAAAAC/cat-crazy-blue-cat.gif")
+        await ctx.send(embed=embed)
+    elif nah == 17:
+        embed.set_image(url="https://c.tenor.com/uMxAPszmTQoAAAAC/cat-crazy-blue-cat.gif")
+        await ctx.send(embed=embed)
+    elif nah == 18:
+        embed.set_image(url="https://c.tenor.com/APnr0hEBj2EAAAAC/cat-crazy-blue-cat.gif")
+        await ctx.send(embed=embed)
+    elif nah == 19:
+        embed.set_image(url="https://c.tenor.com/pyqCUy7VNCkAAAAC/bugcat-capoo.gif")
+        await ctx.send(embed=embed)
 
 
 #info
