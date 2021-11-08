@@ -170,6 +170,7 @@ async def d(ctx):
 @bot.command(aliases=['Bluecat','BLUECAT'],help='Pošle náhodný gif modré kočky', brief='Bluecat gif')
 async def bluecat(ctx):
     nah = random.randint(0,19)
+    await ctx.message.delete()
     embed=discord.Embed(color=0x0B0B45)
     if nah == 0:
         embed.set_image(url="https://c.tenor.com/fORGSJaP4GwAAAAC/blue-cat-wo.gif")
