@@ -18,7 +18,7 @@ async def determine_prefix(bot, message):
         return default_prefixes
 
 intents = discord.Intents(messages=True, guilds=True, members=True)
-bot = commands.Bot(command_prefix = determine_prefix) #prefix bota
+bot = commands.Bot(command_prefix = determine_prefix, help_command=None) #prefix bota
 slash = SlashCommand(bot, sync_commands=True)
 
 
@@ -146,6 +146,12 @@ async def support(ctx):
 @bot.command(aliases=['Twitch','TWITCH'], brief="Odkaz na twitch majitele bota", help="Odkaz na twitch majitele bota, co chceš víc vědět?")
 async def twitch(ctx):
     await ctx.send("Zde je twitch mého stvořitele: https://www.twitch.tv/bluecat201")
+
+#help
+@bot.command()
+async def help(ctx):
+    embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n hug - Random hug gif pro někoho\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\n ping - latence bota\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota", color=0x000000)
+    await ctx.send(embed=embed)
 
 #mluevení za bota
 @commands.has_guild_permissions(administrator=True)
