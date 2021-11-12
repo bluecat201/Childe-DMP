@@ -1,5 +1,0 @@
-name: Run tests
-env:
-    TOKEN: ${{secrets.TOKEN}}
-run:
-  nbdev_test_nbs
