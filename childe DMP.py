@@ -2,6 +2,7 @@ import discord
 import random
 import logging
 import os
+from discord_buttons_plugin import *
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_choice, create_option
 from discord.ext import commands,tasks
@@ -19,11 +20,40 @@ async def determine_prefix(bot, message):
 
 intents = discord.Intents(messages=True, guilds=True, members=True)
 bot = commands.Bot(command_prefix = determine_prefix, help_command=None) #prefix bota
+buttons = ButtonsClient(bot)
 slash = SlashCommand(bot, sync_commands=True)
 
 
 logging.basicConfig(level=logging.INFO)
 TOKEN = ''
+
+#Přihlášení do bota
+@bot.event
+async def on_ready():
+    await bot.change_presence(activity=discord.Streaming(name='Beta v0.1.1', url='https://www.twitch.tv/Bluecat201')) #status bota   
+    print('Connected to bot: {}'.format(bot.user.name))
+    print('Bot ID: {}'.format(bot.user.id))
+
+#test button
+@bot.command()
+async def cbutton(ctx):
+    await buttons.send(
+        content = "this is the message",
+        channel = ctx.channel.id,
+        components = [
+            ActionRow([
+                Button(
+                    label = "A button",
+                    style = ButtonType().Primary,
+                    custom_id = "button_one"
+                )
+            ])
+        ]
+    )
+
+@buttons.click
+async def button_one(ctx):
+    await ctx.reply("Hello")
 
 #kámen, nůžky, papír
 @slash.slash(
@@ -111,12 +141,6 @@ async def _RPS(ctx:SlashContext, option:str):   #1=kámen 2=nůžky 3=papír
 async def _link(ctx:SlashContext, option:str):
     await ctx.send(option)
 
-#Přihlášení do bota
-@bot.event
-async def on_ready():
-    await bot.change_presence(activity=discord.Streaming(name='Beta v0.1.1', url='https://www.twitch.tv/Bluecat201')) #status bota   
-    print('Connected to bot: {}'.format(bot.user.name))
-    print('Bot ID: {}'.format(bot.user.id))
 
 #Nastavení prefixu
 @commands.has_guild_permissions(administrator=True)
