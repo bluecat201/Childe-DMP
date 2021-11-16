@@ -199,69 +199,12 @@ async def d(ctx):
 #bluecat
 @bot.command(aliases=['Bluecat','BLUECAT'],help='Pošle náhodný gif modré kočky', brief='Bluecat gif')
 async def bluecat(ctx):
-    nah = random.randint(0,19)
+    nah = random.randint(1,20)
     await ctx.message.delete()
     embed=discord.Embed(color=0x0B0B45)
-    if nah == 0:
-        embed.set_image(url="https://c.tenor.com/fORGSJaP4GwAAAAC/blue-cat-wo.gif")
-        await ctx.send(embed=embed)
-    elif nah == 1:
-        embed.set_image(url="https://c.tenor.com/bSleCKyyveEAAAAC/bluecat-cute.gif")
-        await ctx.send(embed=embed)
-    elif nah == 2:
-        embed.set_image(url="https://c.tenor.com/D0aN1jITREUAAAAC/blue-bugcat.gif")
-        await ctx.send(embed=embed)
-    elif nah == 3:
-        embed.set_image(url="https://c.tenor.com/J8Sz2t6XwzUAAAAC/bonnejournee-hello.gif")
-        await ctx.send(embed=embed)
-    elif nah == 4:
-        embed.set_image(url="https://c.tenor.com/vadBPwveI50AAAAC/blue-cat-bug-cat-capoo.gif")
-        await ctx.send(embed=embed)
-    elif nah == 5:
-        embed.set_image(url="https://c.tenor.com/3l8Zk8liuWMAAAAC/crazy-blue-cat-cat.gif")
-        await ctx.send(embed=embed)
-    elif nah == 6:
-        embed.set_image(url="https://c.tenor.com/l73iIUVPxo8AAAAC/crazy-blue-cat-cat.gif")
-        await ctx.send(embed=embed)
-    elif nah == 7:
-        embed.set_image(url="https://c.tenor.com/Zu1bfl2DtZEAAAAC/cat-crazy-blue-cat.gif")
-        await ctx.send(embed=embed)
-    elif nah == 8:
-        embed.set_image(url="https://c.tenor.com/2NzI0HjUdVoAAAAC/wiggle-random.gif")
-        await ctx.send(embed=embed)
-    elif nah == 9:
-        embed.set_image(url="https://c.tenor.com/XNGhq50aZ4cAAAAC/cat-crazy-blue-cat.gif")
-        await ctx.send(embed=embed)
-    elif nah == 10:
-        embed.set_image(url="https://c.tenor.com/XiS-MmoQvCMAAAAC/cat-crazt-blue-cat.gif")
-        await ctx.send(embed=embed)
-    elif nah == 11:
-        embed.set_image(url="https://c.tenor.com/cpteQxT2mIAAAAAC/blue-cat.gif")
-        await ctx.send(embed=embed)
-    elif nah == 12:
-        embed.set_image(url="https://c.tenor.com/94ZDYicBkrEAAAAC/blue-cat.gif")
-        await ctx.send(embed=embed)
-    elif nah == 13:
-        embed.set_image(url="https://c.tenor.com/mRSz5lJbtW0AAAAC/bugcat-bugcatsticker.gif")
-        await ctx.send(embed=embed)
-    elif nah == 14:
-        embed.set_image(url="https://c.tenor.com/JGFWu0GIcDsAAAAC/blue-bugcat.gif")
-        await ctx.send(embed=embed)
-    elif nah == 15:
-        embed.set_image(url="https://c.tenor.com/6bpYwINwasQAAAAC/capoo-bugcat-capoo.gif")
-        await ctx.send(embed=embed)
-    elif nah == 16:
-        embed.set_image(url="https://c.tenor.com/feJE-gpuuyMAAAAC/cat-crazy-blue-cat.gif")
-        await ctx.send(embed=embed)
-    elif nah == 17:
-        embed.set_image(url="https://c.tenor.com/uMxAPszmTQoAAAAC/cat-crazy-blue-cat.gif")
-        await ctx.send(embed=embed)
-    elif nah == 18:
-        embed.set_image(url="https://c.tenor.com/APnr0hEBj2EAAAAC/cat-crazy-blue-cat.gif")
-        await ctx.send(embed=embed)
-    elif nah == 19:
-        embed.set_image(url="https://c.tenor.com/pyqCUy7VNCkAAAAC/bugcat-capoo.gif")
-        await ctx.send(embed=embed)
+    file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/Bluecat/{nah}.gif", filename=f"image.gif")
+    embed.set_image(url=f"attachment://image.gif")
+    await ctx.send(file=file, embed=embed)
 
 
 #info
