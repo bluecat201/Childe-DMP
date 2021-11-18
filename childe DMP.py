@@ -30,7 +30,7 @@ TOKEN = ''
 #Přihlášení do bota
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Streaming(name='Beta v0.1.1', url='https://www.twitch.tv/Bluecat201')) #status bota   
+    await bot.change_presence(activity=discord.Streaming(name='Beta v0.1.2', url='https://www.twitch.tv/Bluecat201')) #status bota   
     print('Connected to bot: {}'.format(bot.user.name))
     print('Bot ID: {}'.format(bot.user.id))
 
@@ -174,7 +174,7 @@ async def twitch(ctx):
 #help
 @bot.command()
 async def help(ctx):
-    embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n hug - Random hug gif pro někoho\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\n ping - latence bota\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota", color=0x000000)
+    embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n hug - Random hug gif pro někoho\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\n kiss - Random hug gif pro někoho\n ping - latence bota\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota", color=0x000000)
     await ctx.send(embed=embed)
 
 #mluevení za bota
@@ -210,13 +210,26 @@ async def bluecat(ctx):
 #info
 @bot.command(aliases=['Info','INFO'], brief="Info o botu", help="Vypíše informace o botovi")
 async def info(ctx):
-    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogrogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.1.0 \nOwner: 𝕭𝖑𝖚𝖊𝖈𝖆𝖙#9203")
+    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogrogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.1.2 \nOwner: 𝕭𝖑𝖚𝖊𝖈𝖆𝖙#0406")
 
 #latence
 @bot.command(aliases=['Ping','PING'],brief="Pong", help="Vypíše latency bota")
 async def ping(ctx):
     await ctx.send('Pong! {0}ms'.format(round(bot.latency, 1)))
-    
+
+#kiss
+@bot.command(aliases=['Kiss','KISS'],help="Náhodný gif kiss s pingem dané osoby",brief="Kiss gif, pro někoho")
+async def kiss(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,100)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} líbá {member.mention}", color=0xFFFF00)
+        file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/kiss/{nah}.gif", filename=f"image.gif")
+        embed.set_image(url=f"attachment://image.gif")
+        await ctx.send(file=file, embed=embed)
+
 #hug
 @bot.command(aliases=['Hug','HUG'],help="Náhodný gif hug s pingem dané osoby",brief="Hug gif, pro někoho")
 async def hug(ctx,member : discord.User = None):
