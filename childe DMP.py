@@ -157,17 +157,17 @@ async def sudo_error(ctx, error):
         await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Administrator**.")
         
 #invite bota
-@bot.command(aliases=['Invite','INVITE'], brief="Invite na bota.", help="Pošle invite, díky kterému si bota můžete přidat k sobě na server")
+@bot.command(aliases=['Invite','INVITE'])
 async def invite(ctx):
     await ctx.send("Zde je můj invite: https://discord.com/api/oauth2/authorize?client_id=883325865474269192&permissions=8&scope=bot%20applications.commands")
 
 #support
-@bot.command(aliases=['Support','SUPPORT'], brief="Invite na server majitele bota", help="Pošle invite na server majitele bota, co chceš víc vědět?")
+@bot.command(aliases=['Support','SUPPORT'])
 async def support(ctx):
     await ctx.send("Zde najdete moji podporu: https://dsc.gg/bluecat | https://discord.gg/43H2HxB3Ax")
 
 #twitch
-@bot.command(aliases=['Twitch','TWITCH'], brief="Odkaz na twitch majitele bota", help="Odkaz na twitch majitele bota, co chceš víc vědět?")
+@bot.command(aliases=['Twitch','TWITCH'])
 async def twitch(ctx):
     await ctx.send("Zde je twitch mého stvořitele: https://www.twitch.tv/bluecat201")
 
@@ -179,7 +179,7 @@ async def help(ctx):
 
 #mluevení za bota
 @commands.has_guild_permissions(administrator=True)
-@bot.command(aliases=['Sudo','SUDO'],brief="Mluvení za bota", help="Za command napíšeš co chceš aby napsal bot a on to napíše")
+@bot.command(aliases=['Sudo','SUDO'])
 async def sudo(ctx, *, arg):
     await ctx.send(arg)
     await ctx.message.delete()
@@ -197,7 +197,7 @@ async def d(ctx):
 
 
 #bluecat
-@bot.command(aliases=['Bluecat','BLUECAT'],help='Pošle náhodný gif modré kočky', brief='Bluecat gif')
+@bot.command(aliases=['Bluecat','BLUECAT'])
 async def bluecat(ctx):
     nah = random.randint(1,20)
     await ctx.message.delete()
@@ -208,43 +208,55 @@ async def bluecat(ctx):
 
 
 #info
-@bot.command(aliases=['Info','INFO'], brief="Info o botu", help="Vypíše informace o botovi")
+@bot.command(aliases=['Info','INFO'])
 async def info(ctx):
     await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogrogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.1.2 \nOwner: 𝕭𝖑𝖚𝖊𝖈𝖆𝖙#0406")
 
 #latence
-@bot.command(aliases=['Ping','PING'],brief="Pong", help="Vypíše latency bota")
+@bot.command(aliases=['Ping','PING'])
 async def ping(ctx):
     await ctx.send('Pong! {0}ms'.format(round(bot.latency, 1)))
 
+#bite
+@bot.command(aliases=['Bite','BITE'])
+async def bite(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,13)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} kouše {member.mention}",color=0xadd8e6)
+        embed.set_image(url=f"https://nekos.best/bite/{nah:03}.gif")
+        await ctx.send(embed=embed)
+
 #kiss
-@bot.command(aliases=['Kiss','KISS'],help="Náhodný gif kiss s pingem dané osoby",brief="Kiss gif, pro někoho")
+@bot.command(aliases=['Kiss','KISS'])
 async def kiss(ctx,member : discord.User = None):
     if member is None:
         await ctx.send('Musíš někoho označit/zadat ID')
     else:
         nah = random.randint(1,100)
         await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} líbá {member.mention}", color=0xFFFF00)
+        embed=discord.Embed(description=f"{ctx.author.mention} líbá {member.mention}", color=0xadd8e6)
         file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/kiss/{nah}.gif", filename=f"image.gif")
         embed.set_image(url=f"attachment://image.gif")
         await ctx.send(file=file, embed=embed)
 
 #hug
-@bot.command(aliases=['Hug','HUG'],help="Náhodný gif hug s pingem dané osoby",brief="Hug gif, pro někoho")
+@bot.command(aliases=['Hug','HUG'])
 async def hug(ctx,member : discord.User = None):
     if member is None:
         await ctx.send('Musíš někoho označit/zadat ID')
     else:
         nah = random.randint(1,100)
         await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} objímá {member.mention}", color=0xFFFF00)
+        embed=discord.Embed(description=f"{ctx.author.mention} objímá {member.mention}", color=0xadd8e6)
         file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/hug/{nah}.gif", filename=f"image.gif")
         embed.set_image(url=f"attachment://image.gif")
         await ctx.send(file=file, embed=embed)
         
 #Kick
-@bot.command(aliases=['Kick','KICK'], brief="Kick uživatele", help="Vyhodí zmíněného uživatele ze serveru. Pouze pro lidi s právem vyhodit uživatele")
+@bot.command(aliases=['Kick','KICK'])
 @commands.has_permissions(kick_members=True) #oprávnění na kick?
 async def kick(ctx, member : discord.Member, *, reason=None):
     await member.kick(reason=reason)
@@ -257,7 +269,7 @@ async def kick_error(ctx, error):
         await ctx.send("Omlouvám se, ale pokud chcete použít tenhle command musíte mít oprávnění **vyhodit uživatele**.")
 
 #ban
-@bot.command(aliases=['Ban','BAN'], brief="Ban uživatele", help="Zakáže přístup zmíněnému uživately na server. Pouze pro lidi s právem zabanovat uživatele")
+@bot.command(aliases=['Ban','BAN'])
 @commands.has_permissions(ban_members=True) #oprávnění na ban?
 async def ban(ctx, member : discord.User = None, *, reason=None):
 
@@ -276,7 +288,7 @@ async def ban_error(ctx, error):
         await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Zabanovat uživatele**.")
 
 #unban
-@bot.command(aliases=['ub','UNBAN','Unban'], brief="Unban uživatele", help="Odstraní zákaz zmíněnému uživately na server. Pouze pro lidi s právem zabanovat uživatele")
+@bot.command(aliases=['ub','UNBAN','Unban'])
 @commands.has_guild_permissions(ban_members=True) #má oprávnění na ban?
 @commands.bot_has_permissions(ban_members=True) #má bot oprávnění na ban?
 async def unban(ctx, member: discord.User = None, *, reason=None): 
