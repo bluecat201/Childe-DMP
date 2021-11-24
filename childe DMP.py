@@ -217,6 +217,23 @@ async def info(ctx):
 async def ping(ctx):
     await ctx.send('Pong! {0}ms'.format(round(bot.latency, 1)))
 
+#bored
+@bot.command(aliases=['Bored','BORED'])
+async def bored(ctx):
+    nah = random.randint(1,15)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} se nudí",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/bored/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#blush
+@bot.command(aliases=['Blush','BLUSH'])
+async def blush(ctx):
+    nah = random.randint(1,13)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} se červená",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/blush/{nah:03}.gif")
+    await ctx.send(embed=embed)
 #bite
 @bot.command(aliases=['Bite','BITE'])
 async def bite(ctx,member : discord.User = None):
