@@ -30,7 +30,7 @@ TOKEN = ''
 #Přihlášení do bota
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Streaming(name='Beta v0.1.2', url='https://www.twitch.tv/Bluecat201')) #status bota   
+    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.0', url='https://www.twitch.tv/Bluecat201')) #status bota   
     print('Connected to bot: {}'.format(bot.user.name))
     print('Bot ID: {}'.format(bot.user.id))
 
@@ -141,150 +141,6 @@ async def _RPS(ctx:SlashContext, option:str):   #1=kámen 2=nůžky 3=papír
 async def _link(ctx:SlashContext, option:str):
     await ctx.send(option)
 
-
-#Nastavení prefixu
-@commands.has_guild_permissions(administrator=True)
-@bot.command(aliases=['Setprefix','SETPREFIX'],brief = "Nastaví prefix bota", help="Nastaví prefix bota, co víc k tomu chceš vědět?")
-@commands.guild_only()
-async def setprefix(ctx, *, prefixes=""):
-    custom_prefix[ctx.guild.id] = prefixes.split() or default_prefixes
-    await ctx.send("Prefix nastaven!")
-
-#nemá oprávnění na setprefix
-@setprefix.error
-async def sudo_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Administrator**.")
-        
-#invite bota
-@bot.command(aliases=['Invite','INVITE'])
-async def invite(ctx):
-    await ctx.send("Zde je můj invite: https://discord.com/api/oauth2/authorize?client_id=883325865474269192&permissions=8&scope=bot%20applications.commands")
-
-#support
-@bot.command(aliases=['Support','SUPPORT'])
-async def support(ctx):
-    await ctx.send("Zde najdete moji podporu: https://dsc.gg/bluecat | https://discord.gg/43H2HxB3Ax")
-
-#twitch
-@bot.command(aliases=['Twitch','TWITCH'])
-async def twitch(ctx):
-    await ctx.send("Zde je twitch mého stvořitele: https://www.twitch.tv/bluecat201")
-
-#help
-@bot.command()
-async def help(ctx):
-    embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n hug - Random hug gif pro někoho\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\n kiss - Random hug gif pro někoho\n ping - latence bota\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota", color=0x000000)
-    await ctx.send(embed=embed)
-
-#mluevení za bota
-@commands.has_guild_permissions(administrator=True)
-@bot.command(aliases=['Sudo','SUDO'])
-async def sudo(ctx, *, arg):
-    await ctx.send(arg)
-    await ctx.message.delete()
-
-#nemá oprávnění
-@sudo.error
-async def sudo_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Administrator**.")
-
-#d
-@bot.command()
-async def d(ctx):
-    await ctx.send("<:cicisrdicko:849285560832360531>")
-
-
-#bluecat
-@bot.command(aliases=['Bluecat','BLUECAT'])
-async def bluecat(ctx):
-    nah = random.randint(1,20)
-    await ctx.message.delete()
-    embed=discord.Embed(color=0x0B0B45)
-    file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/Bluecat/{nah}.gif", filename=f"image.gif")
-    embed.set_image(url=f"attachment://image.gif")
-    await ctx.send(file=file, embed=embed)
-
-
-#info
-@bot.command(aliases=['Info','INFO'])
-async def info(ctx):
-    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogrogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.1.2 \nOwner: 𝕭𝖑𝖚𝖊𝖈𝖆𝖙#0406")
-
-#latence
-@bot.command(aliases=['Ping','PING'])
-async def ping(ctx):
-    await ctx.send('Pong! {0}ms'.format(round(bot.latency, 1)))
-
-#bored
-@bot.command(aliases=['Bored','BORED'])
-async def bored(ctx):
-    nah = random.randint(1,15)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} se nudí",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/bored/{nah:03}.gif")
-    await ctx.send(embed=embed)
-
-#blush
-@bot.command(aliases=['Blush','BLUSH'])
-async def blush(ctx):
-    nah = random.randint(1,13)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} se červená",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/blush/{nah:03}.gif")
-    await ctx.send(embed=embed)
-#bite
-@bot.command(aliases=['Bite','BITE'])
-async def bite(ctx,member : discord.User = None):
-    if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
-    else:
-        nah = random.randint(1,13)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} kouše {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/bite/{nah:03}.gif")
-        await ctx.send(embed=embed)
-
-#kiss
-@bot.command(aliases=['Kiss','KISS'])
-async def kiss(ctx,member : discord.User = None):
-    if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
-    else:
-        nah = random.randint(1,100)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} líbá {member.mention}", color=0xadd8e6)
-        file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/kiss/{nah}.gif", filename=f"image.gif")
-        embed.set_image(url=f"attachment://image.gif")
-        await ctx.send(file=file, embed=embed)
-
-#hug
-@bot.command(aliases=['Hug','HUG'])
-async def hug(ctx,member : discord.User = None):
-    if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
-    else:
-        nah = random.randint(1,100)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} objímá {member.mention}", color=0xadd8e6)
-        file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/hug/{nah}.gif", filename=f"image.gif")
-        embed.set_image(url=f"attachment://image.gif")
-        await ctx.send(file=file, embed=embed)
-        
-#Kick
-@bot.command(aliases=['Kick','KICK'])
-@commands.has_permissions(kick_members=True) #oprávnění na kick?
-async def kick(ctx, member : discord.Member, *, reason=None):
-    await member.kick(reason=reason)
-    await ctx.send(f"{member.mention} byl vyhozen z důvodu: {reason}.")
-
-#Nemá oprávnění na kick
-@kick.error
-async def kick_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("Omlouvám se, ale pokud chcete použít tenhle command musíte mít oprávnění **vyhodit uživatele**.")
-
 #ban
 @bot.command(aliases=['Ban','BAN'])
 @commands.has_permissions(ban_members=True) #oprávnění na ban?
@@ -303,6 +159,92 @@ async def ban(ctx, member : discord.User = None, *, reason=None):
 async def ban_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Zabanovat uživatele**.")
+
+#bluecat
+@bot.command(aliases=['Bluecat','BLUECAT'])
+async def bluecat(ctx):
+    nah = random.randint(1,20)
+    await ctx.message.delete()
+    embed=discord.Embed(color=0x0B0B45)
+    file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/Bluecat/{nah}.gif", filename=f"image.gif")
+    embed.set_image(url=f"attachment://image.gif")
+    await ctx.send(file=file, embed=embed)
+
+#d
+@bot.command()
+async def d(ctx):
+    await ctx.send("<:cicisrdicko:849285560832360531>")
+
+#help
+@bot.command()
+async def help(ctx):
+    embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\n ping - latence bota\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n\n\n**Roleplay commands**\nbite,blush,bored,cry,cuddle,dance,facepalm,feed,happy,highfive,hug,kiss,laugh,pat,\npoke,pout,shrug,slap,sleep,smile,smug,stare,think,thumbsup,tickle,wave,wink\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota", color=0x000000)
+    await ctx.send(embed=embed)
+
+#info
+@bot.command(aliases=['Info','INFO'])
+async def info(ctx):
+    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogrogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.0 \nOwner: 𝕭𝖑𝖚𝖊𝖈𝖆𝖙#0406")
+
+#invite bota
+@bot.command(aliases=['Invite','INVITE'])
+async def invite(ctx):
+    await ctx.send("Zde je můj invite: https://discord.com/api/oauth2/authorize?client_id=883325865474269192&permissions=8&scope=bot%20applications.commands")
+
+#Kick
+@bot.command(aliases=['Kick','KICK'])
+@commands.has_permissions(kick_members=True) #oprávnění na kick?
+async def kick(ctx, member : discord.Member, *, reason=None):
+    await member.kick(reason=reason)
+    await ctx.send(f"{member.mention} byl vyhozen z důvodu: {reason}.")
+
+#Nemá oprávnění na kick
+@kick.error
+async def kick_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("Omlouvám se, ale pokud chcete použít tenhle command musíte mít oprávnění **vyhodit uživatele**.")
+
+#ping
+@bot.command(aliases=['Ping','PING'])
+async def ping(ctx):
+    await ctx.send('Pong! {0}ms'.format(round(bot.latency, 1)))
+
+#Nastavení prefixu
+@commands.has_guild_permissions(administrator=True)
+@bot.command(aliases=['Setprefix','SETPREFIX'],brief = "Nastaví prefix bota", help="Nastaví prefix bota, co víc k tomu chceš vědět?")
+@commands.guild_only()
+async def setprefix(ctx, *, prefixes=""):
+    custom_prefix[ctx.guild.id] = prefixes.split() or default_prefixes
+    await ctx.send("Prefix nastaven!")
+
+#nemá oprávnění na setprefix
+@setprefix.error
+async def sudo_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Administrator**.")
+
+#sudo
+@commands.has_guild_permissions(administrator=True)
+@bot.command(aliases=['Sudo','SUDO'])
+async def sudo(ctx, *, arg):
+    await ctx.send(arg)
+    await ctx.message.delete()
+
+#nemá oprávnění
+@sudo.error
+async def sudo_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Administrator**.")
+
+#support
+@bot.command(aliases=['Support','SUPPORT'])
+async def support(ctx):
+    await ctx.send("Zde najdete moji podporu: https://dsc.gg/bluecat | https://discord.gg/43H2HxB3Ax")
+
+#twitch
+@bot.command(aliases=['Twitch','TWITCH'])
+async def twitch(ctx):
+    await ctx.send("Zde je twitch mého stvořitele: https://www.twitch.tv/bluecat201")
 
 #unban
 @bot.command(aliases=['ub','UNBAN','Unban'])
@@ -331,6 +273,287 @@ async def unban_error(self,ctx, error):
     elif isinstance(error,commands.MissingPermissions): #uživatel nemá oprávnění
                     await ctx.send("Nemáš oprávnění zabanovat uživatele aby mohl použít tenhle command")
 
+#|Roleplay|
+
+#bite
+@bot.command(aliases=['Bite','BITE'])
+async def bite(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,13)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} kouše {member.mention}",color=0xadd8e6)
+        embed.set_image(url=f"https://nekos.best/bite/{nah:03}.gif")
+        await ctx.send(embed=embed)
+
+#blush
+@bot.command(aliases=['Blush','BLUSH'])
+async def blush(ctx):
+    nah = random.randint(1,13)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} se červená",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/blush/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#bored
+@bot.command(aliases=['Bored','BORED'])
+async def bored(ctx):
+    nah = random.randint(1,15)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} se nudí",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/bored/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#cry
+@bot.command(aliases=['Cry','CRY'])
+async def cry(ctx):
+    nah = random.randint(1,40)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} brečí",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/cry/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#cuddle
+@bot.command(aliases=['Cuddle','CUDDLE'])
+async def cuddle(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,28)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} se mazlí s {member.mention}",color=0xadd8e6)
+        embed.set_image(url=f"https://nekos.best/cuddle/{nah:03}.gif")
+        await ctx.send(embed=embed)
+
+#dance
+@bot.command(aliases=['Dance','DANCE'])
+async def dance(ctx):
+    nah = random.randint(1,21)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} tancuje",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/dance/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#facepalm
+@bot.command(aliases=['Facepalm','FACEPALM'])
+async def facepalm(ctx):
+    nah = random.randint(1,11)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} facepalm",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/facepalm/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#feed
+@bot.command(aliases=['Feed','FEED'])
+async def feed(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,23)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} krmí {member.mention}",color=0xadd8e6)
+        embed.set_image(url=f"https://nekos.best/feed/{nah:03}.gif")
+        await ctx.send(embed=embed)
+
+#happy
+@bot.command(aliases=['Happy','HAPPY'])
+async def happy(ctx):
+    nah = random.randint(1,12)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} je šťastný",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/happy/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#highfive
+@bot.command(aliases=['Highfive','HIGHFIVE'])
+async def highfive(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,13)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} highfive {member.mention}",color=0xadd8e6)
+        embed.set_image(url=f"https://nekos.best/highfive/{nah:03}.gif")
+        await ctx.send(embed=embed)
+
+#hug
+@bot.command(aliases=['Hug','HUG'])
+async def hug(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,100)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} objímá {member.mention}", color=0xadd8e6)
+        file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/hug/{nah}.gif", filename=f"image.gif")
+        embed.set_image(url=f"attachment://image.gif")
+        await ctx.send(file=file, embed=embed)
+
+#kiss
+@bot.command(aliases=['Kiss','KISS'])
+async def kiss(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,100)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} líbá {member.mention}", color=0xadd8e6)
+        file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/kiss/{nah}.gif", filename=f"image.gif")
+        embed.set_image(url=f"attachment://image.gif")
+        await ctx.send(file=file, embed=embed)
+
+#laugh
+@bot.command(aliases=['Laugh','LAUGH'])
+async def laugh(ctx):
+    nah = random.randint(1,19)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} se směje",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/laugh/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#pat
+@bot.command(aliases=['Pat','PAT'])
+async def pat(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,38)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} hladí {member.mention}",color=0xadd8e6)
+        embed.set_image(url=f"https://nekos.best/pat/{nah:03}.gif")
+        await ctx.send(embed=embed)
+
+#poke
+@bot.command(aliases=['Poke','POKE'])
+async def poke(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,21)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} strká {member.mention}",color=0xadd8e6)
+        embed.set_image(url=f"https://nekos.best/poke/{nah:03}.gif")
+        await ctx.send(embed=embed)
+
+#pout
+@bot.command(aliases=['Pout','POUT'])
+async def pout(ctx):
+    nah = random.randint(1,8)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} pout",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/pout/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#shrug
+@bot.command(aliases=['Shrug','SHRUG'])
+async def shrug(ctx):
+    nah = random.randint(1,8)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} krčí rameny",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/shrug/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#slap
+@bot.command(aliases=['Slap','SLAP'])
+async def slap(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,31)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} dává facku {member.mention}",color=0xadd8e6)
+        embed.set_image(url=f"https://nekos.best/slap/{nah:03}.gif")
+        await ctx.send(embed=embed)
+
+#sleep
+@bot.command(aliases=['Sleep','SLEEP'])
+async def sleep(ctx):
+    nah = random.randint(1,12)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} spí",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/sleep/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#smile
+@bot.command(aliases=['Smile','SMILE'])
+async def smile(ctx):
+    nah = random.randint(1,23)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} usmívá se",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/smile/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#smug
+@bot.command(aliases=['Smug','SMUG'])
+async def smug(ctx):
+    nah = random.randint(1,15)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} smug",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/smug/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#stare
+@bot.command(aliases=['Stare','STARE'])
+async def stare(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,14)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} civí na {member.mention}",color=0xadd8e6)
+        embed.set_image(url=f"https://nekos.best/stare/{nah:03}.gif")
+        await ctx.send(embed=embed)
+
+#think
+@bot.command(aliases=['Think','THINK'])
+async def think(ctx):
+    nah = random.randint(1,11)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} přemýšlí",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/think/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#thumbsup
+@bot.command(aliases=['Thumbsup','THUMBSUP'])
+async def thumbsup(ctx):
+    nah = random.randint(1,16)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} thumbsup",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/thumbsup/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#tickle
+@bot.command(aliases=['Tickle','TICKLE'])
+async def tickle(ctx,member : discord.User = None):
+    if member is None:
+        await ctx.send('Musíš někoho označit/zadat ID')
+    else:
+        nah = random.randint(1,21)
+        await ctx.message.delete()
+        embed=discord.Embed(description=f"{ctx.author.mention} lechtá {member.mention}",color=0xadd8e6)
+        embed.set_image(url=f"https://nekos.best/tickle/{nah:03}.gif")
+        await ctx.send(embed=embed)
+
+#wave
+@bot.command(aliases=['Wave','WAVE'])
+async def wave(ctx):
+    nah = random.randint(1,27)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} mává",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/wave/{nah:03}.gif")
+    await ctx.send(embed=embed)
+
+#wink
+@bot.command(aliases=['Wink','WINK'])
+async def wink(ctx):
+    nah = random.randint(1,15)
+    await ctx.message.delete()
+    embed=discord.Embed(description=f"{ctx.author.mention} mrká",color=0xadd8e6)
+    embed.set_image(url=f"https://nekos.best/wink/{nah:03}.gif")
+    await ctx.send(embed=embed)
+  
+#|výstup do konzole|
 
 #logace připojení uživatele
 @bot.event
