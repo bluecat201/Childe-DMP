@@ -25,7 +25,7 @@ slash = SlashCommand(bot, sync_commands=True)
 
 
 logging.basicConfig(level=logging.INFO)
-TOKEN = 'ODgzMzI1ODY1NDc0MjY5MTky.YTITUQ.TJHFQa-wZa6M8h_goMUVb7p7rNk'
+TOKEN = ''
 
 #Přihlášení do bota
 @bot.event
