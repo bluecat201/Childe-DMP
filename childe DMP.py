@@ -33,7 +33,7 @@ TOKEN = ''
 #Přihlášení do bota
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.1', url='https://www.twitch.tv/Bluecat201')) #status bota   
+    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.2', url='https://www.twitch.tv/Bluecat201')) #status bota   
     print('Connected to bot: {}'.format(bot.user.name))
     print('Bot ID: {}'.format(bot.user.id))
 
@@ -145,29 +145,7 @@ async def _link(ctx:SlashContext, option:str):
     await ctx.send(option)
 
 #economy
-
-async def get_bank_data():
-    with open("mainbank.json","r") as f:
-        users = json.load(f)
-
-    return users
-
-async def open_account(user):
-    users = await get_bank_data()
-
-    if str(user.id) in users:
-        return False
-    else:
-        users[str(user.id)] = {}
-        users[str(user.id)]["wallet"] = 0
-        users[str(user.id)]["bank"] = 0
-
-    with open("mainbank.json","w") as f:
-        json.dump(users,f)
-    return True
-
-
-@bot.command()
+@bot.command(aliases=['bal'])
 async def balance(ctx):
     await open_account(ctx.author)
     user = ctx.author
@@ -181,7 +159,7 @@ async def balance(ctx):
     em.add_field(name = "Bank balance",value = bank_amt)
     await ctx.send(embed = em)
 
-@bot.command()
+@bot.command(aliases=['BEG','Beg'])
 async def beg(ctx):
     await open_account(ctx.author)
 
@@ -198,6 +176,158 @@ async def beg(ctx):
 
     with open("mainbank.json","w") as f:
         json.dump(users,f)
+
+@bot.command(aliases=['with'])
+async def withdraw(ctx,amount = None):
+    await open_account(ctx.author)
+
+    if amount == None:
+        await ctx.send("Prosím zadejte množství")
+        return
+    
+    bal = await update_bank(ctx.author)
+
+    amount = int(amount)
+    if amount>bal[1]:
+        await ctx.send("Nemáte tolik peněz v bance")
+        return
+    if amount<0:
+        await ctx.send("Hodnota nemůže být záporná")
+        return
+    
+    await update_bank(ctx.author,amount)
+    await update_bank(ctx.author,-1*amount,"bank")
+
+    await ctx.send(f"Vybral jsi {amount} peněz")
+
+@bot.command(aliases=['Give','GIVE'])
+async def give(ctx,member:discord.Member,amount = None):
+    await open_account(ctx.author)
+    await open_account(member)
+
+    if amount == None:
+        await ctx.send("Prosím zadejte množství")
+        return
+    
+    bal = await update_bank(ctx.author)
+
+    amount = int(amount)
+    if amount>bal[1]:
+        await ctx.send("Nemáte tolik peněz")
+        return
+    if amount<0:
+        await ctx.send("Hodnota nemůže být záporná")
+        return
+    
+    await update_bank(ctx.author,-1*amount,"bank")
+    await update_bank(member,amount,"bank")
+
+    await ctx.send(f"Dal jsi {amount} peněz")  
+
+@bot.command(aliases=['Rob','ROB'])
+async def rob(ctx,member:discord.Member):
+    await open_account(ctx.author)
+    await open_account(member)
+
+    bal = await update_bank(member)
+
+    if bal[0]<100:
+        await ctx.send("Nevyplatí se to")
+        return
+    
+    earnings = random.randrange(0, bal[0])
+
+    await update_bank(ctx.author,earnings)
+    await update_bank(member,-1*earnings)
+
+    await ctx.send(f"Kradl jsi a získal jsi {earnings} peněz")  
+
+@bot.command(aliases=['dep'])
+async def deposit(ctx,amount = None):
+    await open_account(ctx.author)
+
+    if amount == None:
+        await ctx.send("Prosím zadejte množství")
+        return
+    
+    bal = await update_bank(ctx.author)
+
+    amount = int(amount)
+    if amount>bal[0]:
+        await ctx.send("Nemáte tolik peněz")
+        return
+    if amount<0:
+        await ctx.send("Hodnota nemůže být záporná")
+        return
+    
+    await update_bank(ctx.author,-1*amount)
+    await update_bank(ctx.author,amount,"bank")
+
+    await ctx.send(f"Uložil jsi {amount} peněz")  
+
+@bot.command()
+async def slots(ctx,amount = None):
+    await open_account(ctx.author)
+
+    if amount == None:
+        await ctx.send("Prosím zadejte množství")
+        return
+    
+    bal = await update_bank(ctx.author)
+
+    amount = int(amount)
+    if amount>bal[0]:
+        await ctx.send("Nemáte tolik peněz")
+        return
+    if amount<0:
+        await ctx.send("Hodnota nemůže být záporná")
+        return
+    
+    final = []
+    for i in range(3):
+        a = random.choice(["X","O","Q"])
+
+        final.append(a)
+    await ctx.send(str(final))
+    
+    if final[0] == final[1] or final[0] == final[2] or final[2] == final[1]:
+        await update_bank(ctx.author,2*amount)
+        await ctx.send("Vyhrál jsi")
+    else:
+        await update_bank(ctx.author,-1*amount)
+        await ctx.send("Prohrál jsi")
+
+
+async def open_account(user):
+    users = await get_bank_data()
+
+    if str(user.id) in users:
+        return False
+    else:
+        users[str(user.id)] = {}
+        users[str(user.id)]["wallet"] = 0
+        users[str(user.id)]["bank"] = 0
+
+    with open("mainbank.json","w") as f:
+        json.dump(users,f)
+    return True
+
+async def get_bank_data():
+    with open("mainbank.json","r") as f:
+        users = json.load(f)
+
+    return users
+
+async def update_bank(user,change = 0,mode = "wallet"):
+    users = await get_bank_data()
+
+    users[str(user.id)][mode] += change
+
+    with open("mainbank.json","w") as f:
+        json.dump(users,f)
+    
+    bal = [users[str(user.id)]["wallet"],users[str(user.id)]["bank"]]
+    return bal
 
 #NORMAL COMMANDS
 #ban
@@ -235,7 +365,7 @@ async def d(ctx):
     await ctx.send("<:cicisrdicko:849285560832360531>")
 
 #help
-@bot.command()
+@bot.command(aliases=['HELP','Help'])
 async def help(ctx):
     embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\n ping - latence bota\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n\n\n**Roleplay commands**\nbite,blush,bored,cry,cuddle,dance,facepalm,feed,happy,highfive,hug,kiss,laugh,pat,\npoke,pout,shrug,slap,sleep,smile,smug,stare,think,thumbsup,tickle,wave,wink\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota", color=0x000000)
     await ctx.send(embed=embed)
@@ -243,7 +373,7 @@ async def help(ctx):
 #info
 @bot.command(aliases=['Info','INFO'])
 async def info(ctx):
-    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogrogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.1 \nOwner: 𝕭𝖑𝖚𝖊𝖈𝖆𝖙#0406")
+    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogrogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.2 \nOwner: 𝕭𝖑𝖚𝖊𝖈𝖆𝖙#0406")
 
 #invite bota
 @bot.command(aliases=['Invite','INVITE'])
