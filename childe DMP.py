@@ -144,7 +144,13 @@ async def _RPS(ctx:SlashContext, option:str):   #1=kámen 2=nůžky 3=papír
 async def _link(ctx:SlashContext, option:str):
     await ctx.send(option)
 
-#economy
+#Economy
+
+mainshop = [{"name":"Hodinky","price":100,"description":"Prostě hodinky"},
+            {"name":"Laptop","price":1000,"description":"Laptop, co víc chceš vědět"},
+            {"name":"PC","price":10000,"description":"Počítač na hraní her"}]
+
+#balance
 @bot.command(aliases=['bal'])
 async def balance(ctx):
     await open_account(ctx.author)
@@ -155,10 +161,11 @@ async def balance(ctx):
     bank_amt = users[str(user.id)]["bank"]
 
     em = discord.Embed(title = f"{ctx.author.name}'s balance",color = discord.Color.red())
-    em.add_field(name = "Wallet balance",value = wallet_amt)
-    em.add_field(name = "Bank balance",value = bank_amt)
+    em.add_field(name = "Peněženka",value = wallet_amt)
+    em.add_field(name = "Banka",value = bank_amt)
     await ctx.send(embed = em)
 
+#beg
 @bot.command(aliases=['BEG','Beg'])
 async def beg(ctx):
     await open_account(ctx.author)
@@ -169,7 +176,7 @@ async def beg(ctx):
 
     earnings = random.randrange(101)
 
-    await ctx.send(f"Someon gave you {earnings}  coins!!")
+    await ctx.send(f"Někdo ti dal {earnings}  korun!!")
 
 
     users[str(user.id)]["wallet"] += earnings
@@ -177,6 +184,7 @@ async def beg(ctx):
     with open("mainbank.json","w") as f:
         json.dump(users,f)
 
+#withdraw
 @bot.command(aliases=['with'])
 async def withdraw(ctx,amount = None):
     await open_account(ctx.author)
@@ -200,6 +208,7 @@ async def withdraw(ctx,amount = None):
 
     await ctx.send(f"Vybral jsi {amount} peněz")
 
+#give
 @bot.command(aliases=['Give','GIVE'])
 async def give(ctx,member:discord.Member,amount = None):
     await open_account(ctx.author)
@@ -224,6 +233,7 @@ async def give(ctx,member:discord.Member,amount = None):
 
     await ctx.send(f"Dal jsi {amount} peněz")  
 
+#rob
 @bot.command(aliases=['Rob','ROB'])
 async def rob(ctx,member:discord.Member):
     await open_account(ctx.author)
@@ -242,6 +252,7 @@ async def rob(ctx,member:discord.Member):
 
     await ctx.send(f"Kradl jsi a získal jsi {earnings} peněz")  
 
+#deposite
 @bot.command(aliases=['dep'])
 async def deposit(ctx,amount = None):
     await open_account(ctx.author)
@@ -265,6 +276,7 @@ async def deposit(ctx,amount = None):
 
     await ctx.send(f"Uložil jsi {amount} peněz")  
 
+#slots
 @bot.command()
 async def slots(ctx,amount = None):
     await open_account(ctx.author)
@@ -297,6 +309,100 @@ async def slots(ctx,amount = None):
         await update_bank(ctx.author,-1*amount)
         await ctx.send("Prohrál jsi")
 
+#shop
+@bot.command()
+async def shop(ctx):
+    em = discord.Embed(title = "Shop")
+
+    for item in mainshop:
+        name = item["name"]
+        price = item["price"]
+        desc = item["description"]
+        em.add_field(name = name, value = f"{price} | {desc}")
+    
+    await ctx.send(embed=em)
+
+#buy
+@bot.command()
+async def buy(ctx,item,amount = 1):
+    await open_account(ctx.author)
+
+    res = await buy_this(ctx.author,item,amount)
+
+    if not res[0]:
+        if res[1]==1:
+            await ctx.send("Tento předmět nemáme")
+            return
+        if res[1]==2:
+            await ctx.send(f"Nemáš dostatek peněz v peněžence aby si koupil {amount} {item}")
+
+#bag
+@bot.command()
+async def bag(ctx):
+    await open_account(ctx.author)
+    user = ctx.author
+    users = await get_bank_data()
+
+    try:
+        bag = users[str(user.id)]["bag"]
+    except:
+        bag = []
+
+    em = discord.Embed(title = "Bag")
+    for item in bag:
+        name = item["item"]
+        amount = item["amount"]
+
+        em.add_field(name = name, value = amount)
+
+    await ctx.send(embed = em)
+
+async def buy_this(user,item_name,amount):
+    item_name = item_name.lower()
+    name_ = None
+    for item in mainshop:
+        name = item["name"].lower()
+        if name == item_name:
+            name_ = name
+            price = item["price"]
+            break
+    
+    if name_ == None:
+        return [False,1]
+
+    cost = price*amount
+    
+    users = await get_bank_data()
+
+    bal = await update_bank(user)
+
+    if bal[0]<cost:
+        return [False,2]
+    
+    try:
+        index = 0
+        t = None
+        for thing in users[str(user.id)]["bag"]:
+            n = thing["item"]
+            if n == item_name:
+                old_amt = thing["amount"]
+                new_amt = old_amt + amount
+                users[str(user.id)]["bag"][index]["amount"] = new_amt
+                t = 1
+                break
+            index+=1
+        if t == None:
+            obj = {"item":item_name, "amount":amount}
+            users[str(user.id)]["bag"].append(obj)
+    except:
+        obj = {"item":item_name, "amount":amount}
+        users[str(user.id)]["bag"] = [obj]
+
+    with open("mainbank.json","w") as f:
+        json.dump(users,f)
+
+    await update_bank(user,cost*-1,"wallet")
+    return [True,"Worked"]
 
 async def open_account(user):
     users = await get_bank_data()
