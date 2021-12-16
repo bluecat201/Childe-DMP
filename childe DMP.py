@@ -3,7 +3,6 @@ import random
 import logging
 import json
 import os
-import time
 from discord_buttons_plugin import *
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_choice, create_option
@@ -167,7 +166,15 @@ async def balance(ctx):
     await ctx.send(embed = em)
 
 #beg
+@bot.event
+async def on_command_error(ctx,error):
+    if isinstance(error, commands.CommandOnCooldown): #kontroluje jestli je na cooldownu
+        msg = '**Stále máš cooldown**, prosím zkus to znovu za {:.2f}s'.format(error.retry_after)
+        await ctx.send(msg)
+
 @bot.command(aliases=['BEG','Beg'])
+@commands.cooldown(1,60,commands.BucketType.user)
+
 async def beg(ctx):
     await open_account(ctx.author)
 
@@ -177,7 +184,7 @@ async def beg(ctx):
 
     earnings = random.randrange(101)
 
-    await ctx.send(f"Někdo ti dal {earnings}  korun!!")
+    await ctx.send(f"Někdo ti dal {earnings} korun!!")
 
 
     users[str(user.id)]["wallet"] += earnings
@@ -480,7 +487,7 @@ async def help(ctx):
 #info
 @bot.command(aliases=['Info','INFO'])
 async def info(ctx):
-    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogrogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.2 \nOwner: 𝕭𝖑𝖚𝖊𝖈𝖆𝖙#0406")
+    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.2 \nDeveloper: 𝕭𝖑𝖚𝖊𝖈𝖆𝖙#1234")
 
 #invite bota
 @bot.command(aliases=['Invite','INVITE'])
@@ -580,7 +587,7 @@ async def bite(ctx,member : discord.User = None):
         nah = random.randint(1,13)
         await ctx.message.delete()
         embed=discord.Embed(description=f"{ctx.author.mention} kouše {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/bite/{nah:03}.gif")
+        embed.set_image(url=f"https://nekos.best/public/bite/{nah:03}.gif")
         await ctx.send(embed=embed)
 
 #blush
@@ -589,7 +596,7 @@ async def blush(ctx):
     nah = random.randint(1,13)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} se červená",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/blush/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/blush/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #bored
@@ -598,7 +605,7 @@ async def bored(ctx):
     nah = random.randint(1,15)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} se nudí",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/bored/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/bored/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #cry
@@ -607,7 +614,7 @@ async def cry(ctx):
     nah = random.randint(1,40)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} brečí",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/cry/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/cry/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #cuddle
@@ -619,7 +626,7 @@ async def cuddle(ctx,member : discord.User = None):
         nah = random.randint(1,28)
         await ctx.message.delete()
         embed=discord.Embed(description=f"{ctx.author.mention} se mazlí s {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/cuddle/{nah:03}.gif")
+        embed.set_image(url=f"https://nekos.best/public/cuddle/{nah:03}.gif")
         await ctx.send(embed=embed)
 
 #dance
@@ -628,7 +635,7 @@ async def dance(ctx):
     nah = random.randint(1,21)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} tancuje",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/dance/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/dance/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #facepalm
@@ -637,7 +644,7 @@ async def facepalm(ctx):
     nah = random.randint(1,11)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} facepalm",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/facepalm/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/facepalm/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #feed
@@ -649,7 +656,7 @@ async def feed(ctx,member : discord.User = None):
         nah = random.randint(1,23)
         await ctx.message.delete()
         embed=discord.Embed(description=f"{ctx.author.mention} krmí {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/feed/{nah:03}.gif")
+        embed.set_image(url=f"https://nekos.best/public/feed/{nah:03}.gif")
         await ctx.send(embed=embed)
 
 #happy
@@ -658,7 +665,7 @@ async def happy(ctx):
     nah = random.randint(1,12)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} je šťastný",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/happy/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/happy/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #highfive
@@ -670,7 +677,7 @@ async def highfive(ctx,member : discord.User = None):
         nah = random.randint(1,13)
         await ctx.message.delete()
         embed=discord.Embed(description=f"{ctx.author.mention} highfive {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/highfive/{nah:03}.gif")
+        embed.set_image(url=f"https://nekos.best/public/highfive/{nah:03}.gif")
         await ctx.send(embed=embed)
 
 #hug
@@ -705,7 +712,7 @@ async def laugh(ctx):
     nah = random.randint(1,19)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} se směje",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/laugh/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/laugh/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #pat
@@ -717,7 +724,7 @@ async def pat(ctx,member : discord.User = None):
         nah = random.randint(1,38)
         await ctx.message.delete()
         embed=discord.Embed(description=f"{ctx.author.mention} hladí {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/pat/{nah:03}.gif")
+        embed.set_image(url=f"https://nekos.best/public/pat/{nah:03}.gif")
         await ctx.send(embed=embed)
 
 #poke
@@ -729,7 +736,7 @@ async def poke(ctx,member : discord.User = None):
         nah = random.randint(1,21)
         await ctx.message.delete()
         embed=discord.Embed(description=f"{ctx.author.mention} strká {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/poke/{nah:03}.gif")
+        embed.set_image(url=f"https://nekos.best/public/poke/{nah:03}.gif")
         await ctx.send(embed=embed)
 
 #pout
@@ -738,7 +745,7 @@ async def pout(ctx):
     nah = random.randint(1,8)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} pout",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/pout/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/pout/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #shrug
@@ -747,7 +754,7 @@ async def shrug(ctx):
     nah = random.randint(1,8)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} krčí rameny",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/shrug/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/shrug/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #slap
@@ -759,7 +766,7 @@ async def slap(ctx,member : discord.User = None):
         nah = random.randint(1,31)
         await ctx.message.delete()
         embed=discord.Embed(description=f"{ctx.author.mention} dává facku {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/slap/{nah:03}.gif")
+        embed.set_image(url=f"https://nekos.best/public/slap/{nah:03}.gif")
         await ctx.send(embed=embed)
 
 #sleep
@@ -768,7 +775,7 @@ async def sleep(ctx):
     nah = random.randint(1,12)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} spí",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/sleep/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/sleep/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #smile
@@ -777,7 +784,7 @@ async def smile(ctx):
     nah = random.randint(1,23)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} usmívá se",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/smile/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/smile/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #smug
@@ -786,7 +793,7 @@ async def smug(ctx):
     nah = random.randint(1,15)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} smug",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/smug/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/smug/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #stare
@@ -798,7 +805,7 @@ async def stare(ctx,member : discord.User = None):
         nah = random.randint(1,14)
         await ctx.message.delete()
         embed=discord.Embed(description=f"{ctx.author.mention} civí na {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/stare/{nah:03}.gif")
+        embed.set_image(url=f"https://nekos.best/public/stare/{nah:03}.gif")
         await ctx.send(embed=embed)
 
 #think
@@ -807,7 +814,7 @@ async def think(ctx):
     nah = random.randint(1,11)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} přemýšlí",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/think/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/think/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #thumbsup
@@ -816,7 +823,7 @@ async def thumbsup(ctx):
     nah = random.randint(1,16)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} thumbsup",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/thumbsup/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/thumbsup/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #tickle
@@ -828,7 +835,7 @@ async def tickle(ctx,member : discord.User = None):
         nah = random.randint(1,21)
         await ctx.message.delete()
         embed=discord.Embed(description=f"{ctx.author.mention} lechtá {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/tickle/{nah:03}.gif")
+        embed.set_image(url=f"https://nekos.best/public/tickle/{nah:03}.gif")
         await ctx.send(embed=embed)
 
 #wave
@@ -837,7 +844,7 @@ async def wave(ctx):
     nah = random.randint(1,27)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} mává",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/wave/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/wave/{nah:03}.gif")
     await ctx.send(embed=embed)
 
 #wink
@@ -846,7 +853,7 @@ async def wink(ctx):
     nah = random.randint(1,15)
     await ctx.message.delete()
     embed=discord.Embed(description=f"{ctx.author.mention} mrká",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/wink/{nah:03}.gif")
+    embed.set_image(url=f"https://nekos.best/public/wink/{nah:03}.gif")
     await ctx.send(embed=embed)
   
 #|výstup do konzole|
