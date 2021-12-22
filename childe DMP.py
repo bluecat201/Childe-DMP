@@ -3,6 +3,7 @@ import random
 import logging
 import json
 import os
+import asyncio
 from discord_buttons_plugin import *
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_choice, create_option
@@ -33,7 +34,7 @@ TOKEN = ''
 #Přihlášení do bota
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.2', url='https://www.twitch.tv/Bluecat201')) #status bota   
+    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.3', url='https://www.twitch.tv/Bluecat201')) #status bota   
     print('Connected to bot: {}'.format(bot.user.name))
     print('Bot ID: {}'.format(bot.user.id))
 
@@ -481,13 +482,13 @@ async def d(ctx):
 #help
 @bot.command(aliases=['HELP','Help'])
 async def help(ctx):
-    embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\n ping - latence bota\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n\n\n**Roleplay commands**\nbite,blush,bored,cry,cuddle,dance,facepalm,feed,happy,highfive,hug,kiss,laugh,pat,\npoke,pout,shrug,slap,sleep,smile,smug,stare,think,thumbsup,tickle,wave,wink\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota\n\n\n **Economy**\n balance - zobrazení účtu\nbeg - příjem peněz\n withdraw - vybrat peníze z banky\ngive - daruj někomu peníže\n rob - okraď někoho o peníze\n deposite - ulož peníze do banky\n slots - automaty\n shop - obchod s věcmi\n buy - kup nějakou věc z shopu\n bag - seznam vlastněných věcí", color=0x000000)
+    embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\nmute - dá uživateli muted roli buď na nějakou dobu, nebo dokud nepoužije unmute\n ping - latence bota\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n unmute - odeberele uživately mute\n\n\n**Roleplay commands**\nbite,blush,bored,cry,cuddle,dance,facepalm,feed,happy,highfive,hug,kiss,laugh,pat,\npoke,pout,shrug,slap,sleep,smile,smug,stare,think,thumbsup,tickle,wave,wink\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota\n\n\n **Economy**\n balance - zobrazení účtu\nbeg - příjem peněz\n withdraw - vybrat peníze z banky\ngive - daruj někomu peníže\n rob - okraď někoho o peníze\n deposite - ulož peníze do banky\n slots - automaty\n shop - obchod s věcmi\n buy - kup nějakou věc z shopu\n bag - seznam vlastněných věcí", color=0x000000)
     await ctx.send(embed=embed)
 
 #info
 @bot.command(aliases=['Info','INFO'])
 async def info(ctx):
-    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.2 \nDeveloper: 𝕭𝖑𝖚𝖊𝖈𝖆𝖙#1234")
+    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.3 \nDeveloper: 𝓑𝓵𝓾𝓮𝓬𝓪𝓽#1973")
 
 #invite bota
 @bot.command(aliases=['Invite','INVITE'])
@@ -506,6 +507,80 @@ async def kick(ctx, member : discord.Member, *, reason=None):
 async def kick_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("Omlouvám se, ale pokud chcete použít tenhle command musíte mít oprávnění **vyhodit uživatele**.")
+
+#unmute
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def unmute(ctx, member: discord.Member):
+    guild = ctx.guild
+    mutedRole = discord.utils.get(guild.roles, name="Muted")
+
+    embed = discord.Embed(title="unmuted", description=f"{member.mention} was unmuted ", colour=discord.Colour.light_gray())
+    await ctx.send(embed=embed)
+    await member.send(f" Byl jsi unmutnut v: {guild.name}")
+    await member.remove_roles(mutedRole)
+
+#mute
+@bot.command()
+@commands.has_permissions(manage_messages=True)
+async def mute(ctx, member: discord.Member=None, time=None,*,reason=None):
+    if not member:
+        await ctx.send("Musíte označit uživatele kterého chcete mutnout")
+    elif not time:
+        guild = ctx.guild
+        mutedRole = discord.utils.get(guild.roles, name="Muted")
+
+        if not mutedRole:
+            mutedRole = await guild.create_role(name="Muted")
+
+            for channel in guild.channels:
+                await channel.set_permissions(mutedRole, speak=False, send_messages=False, read_message_history=True, read_messages=False)
+        if not reason:
+            reason="No reason given"
+        embed = discord.Embed(title="muted", description=f"{member.mention} was muted ", colour=discord.Colour.light_gray())
+        embed.add_field(name="reason:", value=reason, inline=False)
+        await ctx.send(embed=embed)
+        await member.send(f" Byl jsi mutnut v: {guild.name} Důvod: {reason}")
+        await member.add_roles(mutedRole, reason=reason)
+    else:
+        if not reason:
+            reason="No reason given"
+        #teď manipulace s časem mutu
+
+        try:
+            seconds = int(time[:-1]) #získá číslo z časového argumentu
+            duration = time[-1] #získá jednotku času, s, m, h, d
+            if duration == "s":
+                seconds = seconds*1
+            elif duration == "m":
+                seconds = seconds * 60
+            elif duration == "h":
+                seconds = seconds * 60 * 60
+            elif duration == "d":
+                seconds = seconds * 86400
+            else:
+                await ctx.send("Nesprávně zadaný čas")
+                return
+        except Exception as e:
+            print(e)
+            await ctx.send("Nesprávně zadaný čas")
+            return
+        guild = ctx.guild
+        Muted = discord.utils.get(guild.roles,name="Muted")
+        if not Muted:
+            Muted = await guild.create_role(name="Muted")
+            for channel in guild.channels:
+                await channel.set_permissions(Muted, speak=False, send_message=False, read_message_history=True, read_messages=False)
+        await member.add_roles(Muted, reason=reason)
+        muted_embed = discord.Embed(title="Muted a user", description=f"{member.mention} Byl mutnut {ctx.author.mention} z důvodu *{reason}* na {time}")
+        await ctx.send(embed=muted_embed)
+        await member.send(f" Byl jsi mutnut v: {guild.name} z důvodu *{reason}* na dobu {seconds}")
+        await asyncio.sleep(seconds)
+        await member.remove_roles(Muted)
+        unmute_embed = discord.Embed(title="Konec mutu",description=f"{member.mention} byl unmutnut")
+        await ctx.send(embed=unmute_embed)
+        await member.send(f" Byl jsi unmutnut v: {guild.name}")
+
 
 #ping
 @bot.command(aliases=['Ping','PING'])
