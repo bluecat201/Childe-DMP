@@ -4,6 +4,7 @@ import logging
 import json
 import os
 import asyncio
+import aiofiles
 from discord_buttons_plugin import *
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_choice, create_option
@@ -24,6 +25,7 @@ async def determine_prefix(bot, message):
 
 intents = discord.Intents(messages=True, guilds=True, members=True)
 bot = commands.Bot(command_prefix = determine_prefix, help_command=None) #prefix bota
+bot.warnings = {} #guild_id : {member_id: [count, [(admin_id, reason)]]}
 buttons = ButtonsClient(bot)
 slash = SlashCommand(bot, sync_commands=True)
 
@@ -34,9 +36,36 @@ TOKEN = ''
 #Přihlášení do bota
 @bot.event
 async def on_ready():
+    for guild in bot.guilds:
+        bot.warnings[guild.id] = {}
+
+        async with aiofiles.open(f"{guild.id}.txt", mode="a") as temp:
+            pass
+
+
+        async with aiofiles.open(f"{guild.id}.txt", mode="r") as file:
+            lines = await file.readlines()
+
+            for line in lines:
+                data = line.split(" ")
+                member_id = int(data[0])
+                admin_id = int(data[1])
+                reason = " ".join(data[2:]).strip("\n")
+
+                try:
+                    bot.warnings[guild.id][member_id][0] += 1
+                    bot.warnings[guild.id][member_id][1].append((admin_id, reason))
+
+                except KeyError:
+                    bot.warnings[guild.id][member_id] = [1, [(admin_id, reason)]]
+
     await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.3', url='https://www.twitch.tv/Bluecat201')) #status bota   
     print('Connected to bot: {}'.format(bot.user.name))
     print('Bot ID: {}'.format(bot.user.id))
+
+@bot.event
+async def on_guild_join(guild):
+    bot.warnings[guild.id] = {}
 
 #test button
 @bot.command()
@@ -650,6 +679,53 @@ async def unban_error(self,ctx, error):
                     await ctx.send("Bot nemá oprávnění zabanovat uživatele aby mohl použít tenhle command.")
     elif isinstance(error,commands.MissingPermissions): #uživatel nemá oprávnění
                     await ctx.send("Nemáš oprávnění zabanovat uživatele aby mohl použít tenhle command")
+
+
+#warn
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def warn(ctx, member: discord.Member=None, *, reason=None):
+    if member is None:
+        return await ctx.send("Uživatel nebyl nalezen, nebo jste ho zapomněli zadat")
+    
+    if reason is None:
+        return await ctx.send("Prosím, zadejte důvod warnu pro tohoto uživatele")
+
+    try:
+        first_warning = False
+        bot.warnings[ctx.guild.id][member.id][0] += 1
+        bot.warnings[ctx.guild.id][member.id][1].append((ctx.author.id, reason))
+    
+    except KeyError:
+        first_warning = True
+        bot.warnings[ctx.guild.id][member.id] = [1, [(ctx.author.id, reason)]]
+    
+    count = bot.warnings[ctx.guild.id][member.id][0]
+
+    async with aiofiles.open(f"{ctx.guild.id}.txt", mode="a") as file:
+        await file.write(f"{member.id} {ctx.author.id} {reason}\n")
+
+    await ctx.send(f"{member.mention} has {count} {'warning' if first_warning else 'warnings'}.")
+    
+#warnings
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def warnings(ctx, member: discord.Member=None):
+    if member is None:
+        return await ctx.send("Uživatel nebyl nalezen, nebo jste ho zapomněli zadat")
+
+    embed = discord.Embed(title=f"Warnings {member.name}",description="", colour=discord.Colour.red())
+    try:
+        i = 1
+        for admin_id, reason in bot.warnings[ctx.guild.id][member.id][1]:
+            admin = ctx.guild.get_member(admin_id)
+            embed.description += f"**Warning {i}** od: {admin.mention} z důvodu: *'{reason}'*.\n"
+            i += 1
+
+        await ctx.send(embed=embed)
+    
+    except KeyError: #no warnings
+        await ctx.send("Tento uživatel nemá žádné warny") 
 
 #|Roleplay|
 
