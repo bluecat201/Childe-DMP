@@ -199,7 +199,7 @@ async def balance(ctx):
 @bot.event
 async def on_command_error(ctx,error):
     if isinstance(error, commands.CommandOnCooldown): #kontroluje jestli je na cooldownu
-        msg = '**Stále máš cooldown**, prosím zkus to znovu za {:.2f}s'.format(error.retry_after)
+        msg = '**Stále máš cooldown**, prosím zkus to znovu za {:.2f}min'.format(error.retry_after)
         await ctx.send(msg)
 
 @bot.command(aliases=['BEG','Beg'])
@@ -272,7 +272,14 @@ async def give(ctx,member:discord.Member,amount = None):
     await ctx.send(f"Dal jsi {amount} peněz")  
 
 #rob
-@bot.command(aliases=['Rob','ROB'])
+@bot.event
+async def on_command_error(ctx,error):
+    if isinstance(error, commands.CommandOnCooldown): #kontroluje jestli je na cooldownu
+        msg = '**Stále máš cooldown**, prosím zkus to znovu za {:.2f}min'.format(error.retry_after)
+        await ctx.send(msg)
+
+@bot.command(aliases=['ROB','Rob'])
+@commands.cooldown(1,60,commands.BucketType.user)
 async def rob(ctx,member:discord.Member):
     await open_account(ctx.author)
     await open_account(member)
@@ -340,7 +347,7 @@ async def slots(ctx,amount = None):
         final.append(a)
     await ctx.send(str(final))
     
-    if final[0] == final[1] or final[0] == final[2] or final[2] == final[1]:
+    if final[0] == final[1] and final[1] == final[2]:
         await update_bank(ctx.author,2*amount)
         await ctx.send("Vyhrál jsi")
     else:
