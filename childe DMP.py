@@ -182,24 +182,38 @@ mainshop = [{"name":"Hodinky","price":100,"description":"Prostě hodinky"},
 
 #balance
 @bot.command(aliases=['bal'])
-async def balance(ctx):
-    await open_account(ctx.author)
-    user = ctx.author
-    users = await get_bank_data()
+async def balance(ctx, member: discord.Member=None):
+    if member==None:
+        await open_account(ctx.author)
+        user = ctx.author
+        users = await get_bank_data()
 
-    wallet_amt = users[str(user.id)]["wallet"]
-    bank_amt = users[str(user.id)]["bank"]
+        wallet_amt = users[str(user.id)]["wallet"]
+        bank_amt = users[str(user.id)]["bank"]
 
-    em = discord.Embed(title = f"{ctx.author.name}'s balance",color = discord.Color.red())
-    em.add_field(name = "Peněženka",value = wallet_amt)
-    em.add_field(name = "Banka",value = bank_amt)
-    await ctx.send(embed = em)
+        em = discord.Embed(title = f"{ctx.author.name}'s balance",color = discord.Color.red())
+        em.add_field(name = "Peněženka",value = wallet_amt)
+        em.add_field(name = "Banka",value = bank_amt)
+        await ctx.send(embed = em)
+
+    else:
+        await open_account(member)
+        user = member
+        users = await get_bank_data()
+
+        wallet_amt = users[str(user.id)]["wallet"]
+        bank_amt = users[str(user.id)]["bank"]
+
+        em = discord.Embed(title = f"{member.name}'s balance",color = discord.Color.red())
+        em.add_field(name = "Peněženka",value = wallet_amt)
+        em.add_field(name = "Banka",value = bank_amt)
+        await ctx.send(embed = em)
 
 #beg
 @bot.event
 async def on_command_error(ctx,error):
     if isinstance(error, commands.CommandOnCooldown): #kontroluje jestli je na cooldownu
-        msg = '**Stále máš cooldown**, prosím zkus to znovu za {:.2f}min'.format(error.retry_after)
+        msg = '**Stále máš cooldown**, prosím zkus to znovu za {:.2f}s'.format(error.retry_after)
         await ctx.send(msg)
 
 @bot.command(aliases=['BEG','Beg'])
