@@ -24,7 +24,7 @@ async def determine_prefix(bot, message):
         return default_prefixes
 
 intents = discord.Intents(messages=True, guilds=True, members=True)
-bot = commands.Bot(command_prefix = determine_prefix, help_command=None) #prefix bota
+bot = commands.Bot(command_prefix = determine_prefix, help_command=None,intents = intents) #prefix bota
 bot.warnings = {} #guild_id : {member_id: [count, [(admin_id, reason)]]}
 buttons = ButtonsClient(bot)
 slash = SlashCommand(bot, sync_commands=True)
@@ -329,6 +329,7 @@ async def deposit(ctx,amount = None):
     if amount<0:
         await ctx.send("Hodnota nemůže být záporná")
         return
+
     
     await update_bank(ctx.author,-1*amount)
     await update_bank(ctx.author,amount,"bank")
@@ -740,6 +741,7 @@ async def warnings(ctx, member: discord.Member=None):
         i = 1
         for admin_id, reason in bot.warnings[ctx.guild.id][member.id][1]:
             admin = ctx.guild.get_member(admin_id)
+            print(admin)
             embed.description += f"**Warning {i}** od: {admin.mention} z důvodu: *'{reason}'*.\n"
             i += 1
 
