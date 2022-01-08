@@ -15,6 +15,7 @@ def login():
 
 	at = Oauth.get_access_token(code)
 	session["token"] = at
+	
 
 	user = Oauth.get_user_json(at)
 	user_name, user_id = user.get("username"), user.get("discriminator")
