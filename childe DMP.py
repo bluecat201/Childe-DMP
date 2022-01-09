@@ -8,7 +8,7 @@ import aiofiles
 from discord_buttons_plugin import *
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_choice, create_option
-from discord.ext import commands,tasks
+from discord.ext import commands, tasks
 from discord.ext.commands import has_permissions, CheckFailure
 
 
@@ -213,11 +213,14 @@ async def balance(ctx, member: discord.Member=None):
 @bot.event
 async def on_command_error(ctx,error):
     if isinstance(error, commands.CommandOnCooldown): #kontroluje jestli je na cooldownu
-        msg = '**Stále máš cooldown**, prosím zkus to znovu za {:.2f}s'.format(error.retry_after)
+        cd  = round(error.retry_after)
+        minutes = str(cd//60)
+        seconds = str(cd%60)
+        msg = f'**Stále máš cooldown**, prosím zkus to znovu za {minutes}min a {seconds}s'
         await ctx.send(msg)
 
 @bot.command(aliases=['BEG','Beg'])
-@commands.cooldown(1,60,commands.BucketType.user)
+@commands.cooldown(1,3600,commands.BucketType.user)
 
 async def beg(ctx):
     await open_account(ctx.author)
@@ -286,12 +289,6 @@ async def give(ctx,member:discord.Member,amount = None):
     await ctx.send(f"Dal jsi {amount} peněz")  
 
 #rob
-@bot.event
-async def on_command_error(ctx,error):
-    if isinstance(error, commands.CommandOnCooldown): #kontroluje jestli je na cooldownu
-        msg = '**Stále máš cooldown**, prosím zkus to znovu za {:.2f}min'.format(error.retry_after)
-        await ctx.send(msg)
-
 @bot.command(aliases=['ROB','Rob'])
 @commands.cooldown(1,60,commands.BucketType.user)
 async def rob(ctx,member:discord.Member):
