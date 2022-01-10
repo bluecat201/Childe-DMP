@@ -1,27 +1,32 @@
-from flask import Flask, render_template, request, session
-from oauth import Oauth
+from quart import Quart, render_template, request, session, redirect, url_for
+from quart_discord import DiscordOAuth2Session
 
 
-app = Flask(__name__)
+app = Quart(__name__)
 app.config["SECRET_KEY"] = "test123"
+app.config["DISCORD_CLIENT_ID"] = 883325865474269192
+app.config["DISCORD_CLIENT_SECRET"] = ""
+app.config["DISCORD_REDIRECT_URI"] = "http://127.0.0.1:5000/callback"
+
+discord = DiscordOAuth2Session(app)
 
 @app.route("/")
-def home():
-	return render_template("index.html",discord_url= Oauth.discord_login_url)
+async def home():
+	return await render_template("index.html")
 
 @app.route("/login")
-def login():
-	code = request.args.get("code")
+async def login():
+	return await discord.create_session()
 
-	at = Oauth.get_access_token(code)
-	session["token"] = at
-	
+@app.route("/callback")
+async def callback():
+	try:
+		await discord.callback()
+	except:
+		return redirect(url_for("login"))
 
-	user = Oauth.get_user_json(at)
-	user_name, user_id = user.get("username"), user.get("discriminator")
-
-	return f"Success, logged in as {user_name}#{user_id}"
-
+	user = await discord.fetch_user()
+	return f"{user.name}#{user.discriminator}"
 
 if __name__ == "__main__":
 	app.run(debug=True)
