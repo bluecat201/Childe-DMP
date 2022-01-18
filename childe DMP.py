@@ -8,8 +8,23 @@ import aiofiles
 from discord_buttons_plugin import *
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_choice, create_option
-from discord.ext import commands, tasks
+from discord.ext import commands, tasks, ipc
 from discord.ext.commands import has_permissions, CheckFailure
+
+class MyBot(commands.Bot):
+
+	def __init__(self,*args,**kwargs):
+		super().__init__(*args,**kwargs)
+
+		self.ipc = ipc.Server(self,secret_key = "Bluecat")
+
+    #Spuštění IPC serveru
+	async def on_ipc_ready(self):
+		print("Ipc server is ready.")
+
+    #Error při spouštění IPC serveru
+	async def on_ipc_error(self, endpoint, error):
+		print(endpoint, "raised", error)
 
 
 os.chdir("C:\\Users\\User\\Desktop\\škola\\DMP\\Childe-DMP")
@@ -24,14 +39,10 @@ async def determine_prefix(bot, message):
         return default_prefixes
 
 intents = discord.Intents(messages=True, guilds=True, members=True)
-bot = commands.Bot(command_prefix = determine_prefix, help_command=None,intents = intents) #prefix bota
+bot = MyBot(command_prefix = determine_prefix, help_command=None,intents = intents) #prefix bota
 bot.warnings = {} #guild_id : {member_id: [count, [(admin_id, reason)]]}
 buttons = ButtonsClient(bot)
 slash = SlashCommand(bot, sync_commands=True)
-
-
-logging.basicConfig(level=logging.INFO)
-TOKEN = ''
 
 #Přihlášení do bota
 @bot.event
@@ -62,6 +73,9 @@ async def on_ready():
     await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.3', url='https://www.twitch.tv/Bluecat201')) #status bota   
     print('Connected to bot: {}'.format(bot.user.name))
     print('Bot ID: {}'.format(bot.user.id))
+
+logging.basicConfig(level=logging.INFO)
+TOKEN = ''
 
 @bot.event
 async def on_guild_join(guild):
@@ -1087,4 +1101,5 @@ async def on_message_delete(message):
     channel = str(message.channel.name)
     print(f'Zpráva "{zprava}" od {username} v roomce {channel} na serveru {server} byla smazána')
 
+bot.ipc.start()
 bot.run(TOKEN)
