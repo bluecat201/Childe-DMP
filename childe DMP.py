@@ -81,16 +81,20 @@ TOKEN = ''
 async def on_guild_join(guild):
     bot.warnings[guild.id] = {}
 
-#test button
+@bot.ipc.route()
+async def get_guild_count(data):
+    return len(bot.guilds) #vrátí počet serverů na kterých bot je do clienta
+
+#button
 @bot.command()
-async def cbutton(ctx):
+async def zdravím(ctx):
     await buttons.send(
-        content = "this is the message",
+        content = "Zdravím",
         channel = ctx.channel.id,
         components = [
             ActionRow([
                 Button(
-                    label = "A button",
+                    label = "Zdravím",
                     style = ButtonType().Primary,
                     custom_id = "button_one"
                 )
@@ -100,7 +104,7 @@ async def cbutton(ctx):
 
 @buttons.click
 async def button_one(ctx):
-    await ctx.reply("Hello")
+    await ctx.reply("Ahoj")
 
 #kámen, nůžky, papír
 @slash.slash(
