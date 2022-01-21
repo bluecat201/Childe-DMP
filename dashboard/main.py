@@ -1,8 +1,10 @@
 from quart import Quart, render_template, request, session, redirect, url_for
 from quart_discord import DiscordOAuth2Session
-
+from discord.ext import ipc
 
 app = Quart(__name__)
+ipc_client = ipc.Client(secret_key = "Bluecat")
+
 app.config["SECRET_KEY"] = "test123"
 app.config["DISCORD_CLIENT_ID"] = 883325865474269192
 app.config["DISCORD_CLIENT_SECRET"] = ""
@@ -27,6 +29,12 @@ async def callback():
 
 	user = await discord.fetch_user()
 	return f"{user.name}#{user.discriminator}"
+
+@app.route("/dashboard")
+async def dashboard():
+	guild_count = await ipc_client.request("get_guild_count")
+
+	return f"Bot je na: {guild_count} serverech"
 
 if __name__ == "__main__":
 	app.run(debug=True)
