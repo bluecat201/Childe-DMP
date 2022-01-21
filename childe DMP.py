@@ -70,7 +70,7 @@ async def on_ready():
                 except KeyError:
                     bot.warnings[guild.id][member_id] = [1, [(admin_id, reason)]]
 
-    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.3', url='https://www.twitch.tv/Bluecat201')) #status bota   
+    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.4', url='https://www.twitch.tv/Bluecat201')) #status bota   
     print('Connected to bot: {}'.format(bot.user.name))
     print('Bot ID: {}'.format(bot.user.id))
 
