@@ -85,6 +85,13 @@ async def on_guild_join(guild):
 async def get_guild_count(data):
     return len(bot.guilds) #vrátí počet serverů na kterých bot je do clienta
 
+@bot.ipc.route()
+async def get_guild_ids(data):
+    final = []
+    for guild in bot.guilds:
+        final.append(guild.id)
+    return final #vrátí id serverů na kterých bot je do clienta
+
 #button
 @bot.command()
 async def zdravím(ctx):
@@ -554,7 +561,7 @@ async def help(ctx):
 #info
 @bot.command(aliases=['Info','INFO'])
 async def info(ctx):
-    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.3 \nDeveloper: 𝓑𝓵𝓾𝓮𝓬𝓪𝓽#1973")
+    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.4 \nDeveloper: 𝓑𝓵𝓾𝓮𝓬𝓪𝓽#1973")
 
 #invite bota
 @bot.command(aliases=['Invite','INVITE'])
