@@ -14,27 +14,38 @@ discord = DiscordOAuth2Session(app)
 
 @app.route("/")
 async def home():
-	return await render_template("index.html")
+    return await render_template("index.html")
 
 @app.route("/login")
 async def login():
-	return await discord.create_session()
+    return await discord.create_session()
 
 @app.route("/callback")
 async def callback():
-	try:
-		await discord.callback()
-	except:
-		return redirect(url_for("login"))
+    try:
+        await discord.callback()
+    except:
+        return redirect(url_for("login"))
 
-	user = await discord.fetch_user()
-	return f"{user.name}#{user.discriminator}"
+    user = await discord.fetch_user()
+    return f"{user.name}#{user.discriminator}"
 
 @app.route("/dashboard")
 async def dashboard():
-	guild_count = await ipc_client.request("get_guild_count")
+    guild_count = await ipc_client.request("get_guild_count")
+    guild_ids = await ipc_client.request("get_guild_ids")
 
-	return f"Bot je na: {guild_count} serverech"
+    try:
+        user_guilds = await discord.fetch_guilds()
+    except:
+        return redirect(url_for("login"))
+
+    same_guilds = []
+    for guild in user_guilds:
+        if guild in guild_ids:
+            same_guilds.append(guild)
+
+    return await render_template("dashboard.html", guild_count = guild_count, matching = same_guilds)
 
 if __name__ == "__main__":
-	app.run(debug=True)
+    app.run(debug=True)
