@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title >Dashboard</title>
+</head>
+<body>
+<h1>Childe Dashboard</h1>
+
+<h2>Bot je na: {{guild_count}} serverech</h2>
+
+<h3>Stejné servery:</h3>
+
+<ul>
+{% for guild in matching %}
+    <li>{{ guild.name }}</li>
+{% endfor %}
+</ul>
+
+<b>Momentální verze Childe:</b> Beta 0.2.4
+</body>
+<footer><i><small>Childe Dashboard v0.0.0</p>Latest update: 25.01.2022</small></i></footer>
+</html>
