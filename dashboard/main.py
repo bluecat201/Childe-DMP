@@ -6,8 +6,8 @@ app = Quart(__name__)
 ipc_client = ipc.Client(secret_key = "Bluecat")
 
 app.config["SECRET_KEY"] = "test123"
-app.config["DISCORD_CLIENT_ID"] = 883325865474269192
-app.config["DISCORD_CLIENT_SECRET"] = ""
+app.config["DISCORD_CLIENT_ID"] = 
+app.config["DISCORD_CLIENT_SECRET"] = "6HkKR1-il7sx7TszTzfv7duly3bOR16F"
 app.config["DISCORD_REDIRECT_URI"] = "http://127.0.0.1:5000/callback"
 
 discord = DiscordOAuth2Session(app)
@@ -20,6 +20,7 @@ async def home():
 async def login():
     return await discord.create_session()
 
+
 @app.route("/callback")
 async def callback():
     try:
@@ -29,6 +30,7 @@ async def callback():
 
     user = await discord.fetch_user()
     return f"{user.name}#{user.discriminator}"
+
 
 @app.route("/dashboard")
 async def dashboard():
@@ -42,7 +44,7 @@ async def dashboard():
 
     same_guilds = []
     for guild in user_guilds:
-        if guild in guild_ids:
+        if guild.id in guild_ids:
             same_guilds.append(guild)
 
     return await render_template("dashboard.html", guild_count = guild_count, matching = same_guilds)
