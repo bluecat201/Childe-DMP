@@ -1,14 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title >Domovská stránka</title>
+    <title>Domovská stránka</title>
+    <link rel="stylesheet" type="text/css" href="/css.css" />
+    <style>
+      button {
+        background-color: #4caf50; 
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        border-radius: 12px;
+      }
+      button:hover {
+        transform: scale(1.1);
+        cursor: pointer;
+      }
+    </style>
 </head>
 <body>
-<h1>Vítejte na Childe dashboardu</h1>
+    <h1>Vítejte na Childe dashboardu</h1>
 
-Klikni sem, aby ses přihlásil:
-<a href="/login"><button>Přihlášení</button></a></p>
+    <p align="center">
+        {% if not authorized %}
+        <a href="/login"><button>Přihlášení</button></a>
+        {% else %}
+        <a href="/dashboard"><button>Otevřít Dashboard</button></a>
+        {% endif %}
+    </p>
 <b>Momentální verze Childe:</b> Beta 0.2.4
 </body>
-<footer><i><small>Childe Dashboard v0.0.0</p>Latest update: 25.01.2022</small></i></footer>
+<footer><i><small>Childe Dashboard v0.0.0</p>Latest update: 01.02.2022</small></i></footer>
 </html>

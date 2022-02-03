@@ -2,21 +2,36 @@
 <html>
 <head>
     <title >Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="/css.css" />
 </head>
 <body>
-<h1>Childe Dashboard</h1>
+    <h1>Childe Dashboard</h1>
 
-<h2>Bot je na: {{guild_count}} serverech</h2>
-
-<h3>Stejné servery:</h3>
-
-<ul>
-{% for guild in matching %}
-    <li>{{ guild.name }}</li>
-{% endfor %}
-</ul>
+    <h2>Bot je na: {{guild_count}} serverech</h2>
+    <div class="picker">
+        <h3>Zdravím, {{username}}! Prosím vyber server a začni</h3>
+        <hr />
+        <section class="cards">
+        {% for guild in guilds %}
+        <div class="card">
+            <a href="/dashboard/{{guild.id}}">
+                {% if guild.icon_url is not none %}
+                <img src="{{guild.icon_url}}" class="{{guild.class_color}}" />
+                {% else %}
+                <img
+                    src="https://discordapp.com/assets/322c936a8c8be1b803cd94861bdfa868.png"
+                    class="{{guild.class_color}}"
+                />
+                {% endif %}
+            </a>
+            <br />
+            {{ guild.name }}
+        </div>
+        {% endfor %}
+    </section>
+</div>
 
 <b>Momentální verze Childe:</b> Beta 0.2.4
 </body>
-<footer><i><small>Childe Dashboard v0.0.0</p>Latest update: 25.01.2022</small></i></footer>
+<footer><i><small>Childe Dashboard v0.0.0</p>Latest update: 01.02.2022</small></i></footer>
 </html>
