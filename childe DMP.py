@@ -92,6 +92,19 @@ async def get_guild_ids(data):
         final.append(guild.id)
     return final #vrátí id serverů na kterých bot je do clienta
 
+@bot.ipc.route()
+async def get_guild(data):
+    guild = bot.get_guild(data.guild_id)
+    if guild is None: return None
+
+    guild_data = {
+        "name": guild.name,
+        "id": guild.id,
+        "prefix": "!"
+    }
+
+    return guild_data
+
 #button
 @bot.command()
 async def zdravím(ctx):
@@ -555,7 +568,7 @@ async def d(ctx):
 #help
 @bot.command(aliases=['HELP','Help'])
 async def help(ctx):
-    embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\nmute - dá uživateli muted roli buď na nějakou dobu, nebo dokud nepoužije unmute\n ping - latence bota\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n unmute - odeberele uživately mute\n\n\n**Roleplay commands**\nbite,blush,bored,cry,cuddle,dance,facepalm,feed,happy,highfive,hug,kiss,laugh,pat,\npoke,pout,shrug,slap,sleep,smile,smug,stare,think,thumbsup,tickle,wave,wink\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota\n\n\n **Economy**\n balance - zobrazení účtu\nbeg - příjem peněz\n withdraw - vybrat peníze z banky\ngive - daruj někomu peníže\n rob - okraď někoho o peníze\n deposite - ulož peníze do banky\n slots - automaty\n shop - obchod s věcmi\n buy - kup nějakou věc z shopu\n bag - seznam vlastněných věcí", color=0x000000)
+    embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\nmute - dá uživateli muted roli buď na nějakou dobu, nebo dokud nepoužije unmute\n ping - latence bota\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n unmute - odeberele uživately mute\n warn - varování uživatele\n warnings - výpis varování uživatele\n\n\n**Roleplay commands**\nbite,blush,bored,cry,cuddle,dance,facepalm,feed,happy,highfive,hug,kiss,laugh,pat,\npoke,pout,shrug,slap,sleep,smile,smug,stare,think,thumbsup,tickle,wave,wink\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota\n\n\n **Economy**\n balance - zobrazení účtu\nbeg - příjem peněz\n withdraw - vybrat peníze z banky\ngive - daruj někomu peníže\n rob - okraď někoho o peníze\n deposite - ulož peníze do banky\n slots - automaty\n shop - obchod s věcmi\n buy - kup nějakou věc z shopu\n bag - seznam vlastněných věcí", color=0x000000)
     await ctx.send(embed=embed)
 
 #info
