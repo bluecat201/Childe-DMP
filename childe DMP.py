@@ -1,3 +1,4 @@
+from email import message
 import discord
 import random
 import logging
@@ -8,8 +9,9 @@ import aiofiles
 from discord_buttons_plugin import *
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_choice, create_option
-from discord.ext import commands, tasks, ipc
+from discord.ext import commands,tasks, ipc
 from discord.ext.commands import has_permissions, CheckFailure
+from numpy import delete
 
 class MyBot(commands.Bot):
 
@@ -44,6 +46,7 @@ bot.warnings = {} #guild_id : {member_id: [count, [(admin_id, reason)]]}
 buttons = ButtonsClient(bot)
 slash = SlashCommand(bot, sync_commands=True)
 
+
 #Přihlášení do bota
 @bot.event
 async def on_ready():
@@ -70,9 +73,11 @@ async def on_ready():
                 except KeyError:
                     bot.warnings[guild.id][member_id] = [1, [(admin_id, reason)]]
 
-    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.4', url='https://www.twitch.tv/Bluecat201')) #status bota   
+    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.5', url='https://www.twitch.tv/Bluecat201')) #status bota   
     print('Connected to bot: {}'.format(bot.user.name))
     print('Bot ID: {}'.format(bot.user.id))
+
+
 
 logging.basicConfig(level=logging.INFO)
 TOKEN = ''
@@ -92,6 +97,7 @@ async def get_guild_ids(data):
         final.append(guild.id)
     return final #vrátí id serverů na kterých bot je do clienta
 
+
 @bot.ipc.route()
 async def get_guild(data):
     guild = bot.get_guild(data.guild_id)
@@ -105,16 +111,17 @@ async def get_guild(data):
 
     return guild_data
 
+
 #button
 @bot.command()
-async def zdravím(ctx):
+async def ahoj(ctx):
     await buttons.send(
-        content = "Zdravím",
+        content = "Ahoj",
         channel = ctx.channel.id,
         components = [
             ActionRow([
                 Button(
-                    label = "Zdravím",
+                    label = "Jak se vede?",
                     style = ButtonType().Primary,
                     custom_id = "button_one"
                 )
@@ -124,7 +131,13 @@ async def zdravím(ctx):
 
 @buttons.click
 async def button_one(ctx):
-    await ctx.reply("Ahoj")
+    reply= random.randint(1,3)
+    if reply == 1:
+        await ctx.reply("Dobře, jak se vede tobě?")
+    if reply == 2:
+        await ctx.reply("Bohužel špatně :c, jak se vede tobě?")
+    if reply == 3:
+        await ctx.reply("tak jako vždycky ^^")
 
 #kámen, nůžky, papír
 @slash.slash(
@@ -568,7 +581,7 @@ async def d(ctx):
 #help
 @bot.command(aliases=['HELP','Help'])
 async def help(ctx):
-    embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\nmute - dá uživateli muted roli buď na nějakou dobu, nebo dokud nepoužije unmute\n ping - latence bota\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n unmute - odeberele uživately mute\n warn - varování uživatele\n warnings - výpis varování uživatele\n\n\n**Roleplay commands**\nbite,blush,bored,cry,cuddle,dance,facepalm,feed,happy,highfive,hug,kiss,laugh,pat,\npoke,pout,shrug,slap,sleep,smile,smug,stare,think,thumbsup,tickle,wave,wink\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota\n\n\n **Economy**\n balance - zobrazení účtu\nbeg - příjem peněz\n withdraw - vybrat peníze z banky\ngive - daruj někomu peníže\n rob - okraď někoho o peníze\n deposite - ulož peníze do banky\n slots - automaty\n shop - obchod s věcmi\n buy - kup nějakou věc z shopu\n bag - seznam vlastněných věcí", color=0x000000)
+    embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\nmute - dá uživateli muted roli buď na nějakou dobu, nebo dokud nepoužije unmute\n ping - latence bota\npurge - smaže určitý počet zpráv\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n unmute - odeberele uživately mute\n warn - varování uživatele\n warnings - výpis varování uživatele\n\n\n**Roleplay commands**\nbite,blush,bored,cry,cuddle,dance,facepalm,feed,happy,highfive,hug,kiss,laugh,pat,\npoke,pout,shrug,slap,sleep,smile,smug,stare,think,thumbsup,tickle,wave,wink\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota\n\n\n **Economy**\n balance - zobrazení účtu\nbeg - příjem peněz\n withdraw - vybrat peníze z banky\ngive - daruj někomu peníže\n rob - okraď někoho o peníze\n deposite - ulož peníze do banky\n slots - automaty\n shop - obchod s věcmi\n buy - kup nějakou věc z shopu\n bag - seznam vlastněných věcí", color=0x000000)
     await ctx.send(embed=embed)
 
 #info
@@ -674,7 +687,7 @@ async def ping(ctx):
     await ctx.send('Pong! {0}ms'.format(round(bot.latency, 1)))
 
 #Nastavení prefixu
-@commands.has_guild_permissions(administrator=True)
+@commands.has_guild_permissions(manage_messages=True)
 @bot.command(aliases=['Setprefix','SETPREFIX'],brief = "Nastaví prefix bota", help="Nastaví prefix bota, co víc k tomu chceš vědět?")
 @commands.guild_only()
 async def setprefix(ctx, *, prefixes=""):
@@ -686,6 +699,20 @@ async def setprefix(ctx, *, prefixes=""):
 async def sudo_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Administrator**.")
+
+#purge
+@bot.command(pass_context=True)
+@commands.has_permissions(administrator=True)
+async def purge(ctx, limit: int):
+        await ctx.message.delete()
+        await ctx.channel.purge(limit=limit)
+        await ctx.send('Vymazáno {}'.format(ctx.author.mention))
+
+@purge.error
+async def clear_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("Nemůžeš tohle udělat")
+
 
 #sudo
 @commands.has_guild_permissions(administrator=True)
