@@ -1,4 +1,3 @@
-from email import message
 import discord
 import random
 import logging
@@ -6,12 +5,12 @@ import json
 import os
 import asyncio
 import aiofiles
-from discord_buttons_plugin import *
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_choice, create_option
 from discord.ext import commands,tasks, ipc
 from discord.ext.commands import has_permissions, CheckFailure
-from numpy import delete
+from discord_components import *
+
 
 class MyBot(commands.Bot):
 
@@ -43,7 +42,7 @@ async def determine_prefix(bot, message):
 intents = discord.Intents(messages=True, guilds=True, members=True)
 bot = MyBot(command_prefix = determine_prefix, help_command=None,intents = intents) #prefix bota
 bot.warnings = {} #guild_id : {member_id: [count, [(admin_id, reason)]]}
-buttons = ButtonsClient(bot)
+DiscordComponents(bot)
 slash = SlashCommand(bot, sync_commands=True)
 
 
@@ -110,34 +109,6 @@ async def get_guild(data):
     }
 
     return guild_data
-
-
-#button
-@bot.command()
-async def ahoj(ctx):
-    await buttons.send(
-        content = "Ahoj",
-        channel = ctx.channel.id,
-        components = [
-            ActionRow([
-                Button(
-                    label = "Jak se vede?",
-                    style = ButtonType().Primary,
-                    custom_id = "button_one"
-                )
-            ])
-        ]
-    )
-
-@buttons.click
-async def button_one(ctx):
-    reply= random.randint(1,3)
-    if reply == 1:
-        await ctx.reply("Dobře, jak se vede tobě?")
-    if reply == 2:
-        await ctx.reply("Bohužel špatně :c, jak se vede tobě?")
-    if reply == 3:
-        await ctx.reply("tak jako vždycky ^^")
 
 #kámen, nůžky, papír
 @slash.slash(
@@ -224,6 +195,7 @@ async def _RPS(ctx:SlashContext, option:str):   #1=kámen 2=nůžky 3=papír
 )
 async def _link(ctx:SlashContext, option:str):
     await ctx.send(option)
+
 
 #Economy
 
@@ -579,15 +551,54 @@ async def d(ctx):
     await ctx.send("<:cicisrdicko:849285560832360531>")
 
 #help
-@bot.command(aliases=['HELP','Help'])
+@bot.command()
 async def help(ctx):
-    embed=discord.Embed(title="Help",description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\nmute - dá uživateli muted roli buď na nějakou dobu, nebo dokud nepoužije unmute\n ping - latence bota\npurge - smaže určitý počet zpráv\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n unmute - odeberele uživately mute\n warn - varování uživatele\n warnings - výpis varování uživatele\n\n\n**Roleplay commands**\nbite,blush,bored,cry,cuddle,dance,facepalm,feed,happy,highfive,hug,kiss,laugh,pat,\npoke,pout,shrug,slap,sleep,smile,smug,stare,think,thumbsup,tickle,wave,wink\n\n\n **Slash commands**\n RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota\n\n\n **Economy**\n balance - zobrazení účtu\nbeg - příjem peněz\n withdraw - vybrat peníze z banky\ngive - daruj někomu peníže\n rob - okraď někoho o peníze\n deposite - ulož peníze do banky\n slots - automaty\n shop - obchod s věcmi\n buy - kup nějakou věc z shopu\n bag - seznam vlastněných věcí", color=0x000000)
-    await ctx.send(embed=embed)
+    embed=discord.Embed(title="Help",description="1 - Základní commandy\n 2 - Roleplay commandy\n 3 - Slash commands\n 4 - Economy commands", color=0x000000)
+    one = Button(style=ButtonStyle.blue,label="1",id="embed1")
+    two = Button(style=ButtonStyle.blue,label="2",id="embed2")
+    three = Button(style=ButtonStyle.blue,label="3",id="embed3")
+    four = Button(style=ButtonStyle.blue,label="4",id="embed4")
+    invite = Button(style=ButtonStyle.URL,label="Invite zde", url="https://discord.com/api/oauth2/authorize?client_id=883325865474269192&permissions=8&scope=bot%20applications.commands")
+
+    embed1 = discord.Embed(title="1 - Základní commandy", description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\nmute - dá uživateli muted roli buď na nějakou dobu, nebo dokud nepoužije unmute\n ping - latence bota\npurge - smaže určitý počet zpráv\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n unmute - odeberele uživately mute\n warn - varování uživatele\n warnings - výpis varování uživatele", color=0x000000)
+    embed2 = discord.Embed(title="2 - Roleplay commandy", description="Výpis roleplay commandů: bite,blush,bored,cry,cuddle,dance,facepalm,feed,happy,highfive,hug,kiss,laugh,pat,\npoke,pout,shrug,slap,sleep,smile,smug,stare,think,thumbsup,tickle,wave,wink", ccolor=0x000000)
+    embed3 = discord.Embed(title="3 - Slash commandy", description="RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota", color=0x000000)
+    embed4 = discord.Embed(title="4 - Economy commandy", description="balance - zobrazení účtu\nbeg - příjem peněz\n withdraw - vybrat peníze z banky\ngive - daruj někomu peníže\n rob - okraď někoho o peníze\n deposite - ulož peníze do banky\n slots - automaty\n shop - obchod s věcmi\n buy - kup nějakou věc z shopu\n bag - seznam vlastněných věcí", color=0x000000)
+
+    await ctx.send(embed=embed,components=[[one,two,three,four],[invite]])
+
+    buttons = {
+        "embed1": embed1,
+        "embed2": embed2,
+        "embed3": embed3,
+        "embed4": embed4
+    }
+    
+    while True:
+        print("1")
+        event = await bot.wait_for("button_click")     #aby to bralo jen stisknutí talčítka v té samé guildě, ve které byl poslán příkaz
+        print("2")
+        if event.channel is not ctx.channel:
+            print("3")
+            return
+        if event.channel == ctx.channel:
+            print("4")
+            response = buttons.get(event.component.id)
+            print("5")
+            if response is None:
+                await event.channel.send(
+                    "Něco se pokazilo. Zkuste to prosím znovu"
+                )
+            if event.channel == ctx.channel:
+                print("6")
+                await event.send(embed=response)
+                print("7")
+
 
 #info
 @bot.command(aliases=['Info','INFO'])
 async def info(ctx):
-    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||1.3 - 29.4.2022|| \nNaprogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.4 \nDeveloper: 𝓑𝓵𝓾𝓮𝓬𝓪𝓽#1973")
+    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||25.3.2022|| \nNaprogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.5 \nDeveloper: 𝓑𝓵𝓾𝓮𝓬𝓪𝓽#1973")
 
 #invite bota
 @bot.command(aliases=['Invite','INVITE'])
