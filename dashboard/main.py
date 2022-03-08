@@ -16,10 +16,6 @@ discord = DiscordOAuth2Session(app)
 async def home():
     return await render_template("index.html", authorized = await discord.authorized)
 
-@app.route("/css.css")
-async def css():
-    return await render_template("index.css")
-
 @app.route("/login")
 async def login():
     return await discord.create_session()
@@ -64,7 +60,7 @@ async def dashboard_server(guild_id):
     guild = await ipc_client.request("get_guild", guild_id = guild_id)
     if guild is None:
 	    return redirect(f'https://discord.com/oauth2/authorize?&client_id={app.config["DISCORD_CLIENT_ID"]}&scope=bot&permissions=8&guild_id={guild_id}&response_type=code&redirect_uri={app.config["DISCORD_REDIRECT_URI"]}')
-    return guild["name"]
+    return "Je na serveru"
 
 if __name__ == "__main__":
     app.run(debug=True)
