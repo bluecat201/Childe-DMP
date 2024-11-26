@@ -1,37 +1,16 @@
 import discord
+from discord.ext import commands, tasks
 import random
-import logging
 import json
 import os
 import asyncio
+from discord.ui import Button, View
+from discord import app_commands
+from discord.ext.commands import MissingPermissions
 import aiofiles
-from discord_slash import SlashCommand, SlashContext
-from discord_slash.utils.manage_commands import create_choice, create_option
-from discord.ext import commands,tasks, ipc
-from discord.ext.commands import has_permissions, CheckFailure
-from discord_components import *
 
 
-class MyBot(commands.Bot):
-
-	def __init__(self,*args,**kwargs):
-		super().__init__(*args,**kwargs)
-
-		self.ipc = ipc.Server(self,secret_key = "Bluecat")
-
-    #Spuštění IPC serveru
-	async def on_ipc_ready(self):
-		print("Ipc server is ready.")
-
-    #Error při spouštění IPC serveru
-	async def on_ipc_error(self, endpoint, error):
-		print(endpoint, "raised", error)
-
-
-os.chdir("C:\\Users\\User\\Desktop\\škola\\DMP\\Childe-DMP")
-custom_prefix = {}
-default_prefixes = ['!']
-
+# Nastavení prefixu
 async def determine_prefix(bot, message):
     guild = message.guild
     if guild:
@@ -39,405 +18,271 @@ async def determine_prefix(bot, message):
     else:
         return default_prefixes
 
-intents = discord.Intents(messages=True, guilds=True, members=True)
-bot = MyBot(command_prefix = determine_prefix, help_command=None,intents = intents) #prefix bota
-bot.warnings = {} #guild_id : {member_id: [count, [(admin_id, reason)]]}
-DiscordComponents(bot)
-slash = SlashCommand(bot, sync_commands=True)
+# Nastavení základních proměnných
+os.chdir("C:\\Users\\Elitebook\\Desktop\\Childe\\Childe-DMP")
+custom_prefix = {}
+default_prefixes = ['!']
 
+intents = discord.Intents.default()
+intents.message_content = True
+intents.guilds = True
+intents.members = True
 
-#Přihlášení do bota
+bot = commands.Bot(command_prefix=determine_prefix, intents=intents)
+bot.warnings = {}  # guild_id : {member_id: [count, [(admin_id, reason)]]}
+
+# Event: Bot je připraven
 @bot.event
 async def on_ready():
+    print(f'Connected to bot: {bot.user.name}')
+    print(f'Bot ID: {bot.user.id}')
+    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.5', url='https://www.twitch.tv/Bluecat201'))
+    # Inicializace varování
     for guild in bot.guilds:
         bot.warnings[guild.id] = {}
 
-        async with aiofiles.open(f"{guild.id}.txt", mode="a") as temp:
-            pass
-
+        if not os.path.exists(f"{guild.id}.txt"):
+            with open(f"{guild.id}.txt", "w") as f:
+                pass
 
         async with aiofiles.open(f"{guild.id}.txt", mode="r") as file:
             lines = await file.readlines()
-
             for line in lines:
                 data = line.split(" ")
                 member_id = int(data[0])
                 admin_id = int(data[1])
                 reason = " ".join(data[2:]).strip("\n")
+                bot.warnings[guild.id].setdefault(member_id, [0, []])
+                bot.warnings[guild.id][member_id][0] += 1
+                bot.warnings[guild.id][member_id][1].append((admin_id, reason))
 
-                try:
-                    bot.warnings[guild.id][member_id][0] += 1
-                    bot.warnings[guild.id][member_id][1].append((admin_id, reason))
-
-                except KeyError:
-                    bot.warnings[guild.id][member_id] = [1, [(admin_id, reason)]]
-
-    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.5', url='https://www.twitch.tv/Bluecat201')) #status bota   
-    print('Connected to bot: {}'.format(bot.user.name))
-    print('Bot ID: {}'.format(bot.user.id))
-
-
-
-logging.basicConfig(level=logging.INFO)
-TOKEN = ''
-
+# Event: Připojení na nový server
 @bot.event
 async def on_guild_join(guild):
     bot.warnings[guild.id] = {}
 
-@bot.ipc.route()
-async def get_guild_count(data):
-    return len(bot.guilds) #vrátí počet serverů na kterých bot je do clienta
-
-@bot.ipc.route()
-async def get_guild_ids(data):
-    final = []
-    for guild in bot.guilds:
-        final.append(guild.id)
-    return final #vrátí id serverů na kterých bot je do clienta
-
-
-@bot.ipc.route()
-async def get_guild(data):
-    guild = bot.get_guild(data.guild_id)
-    if guild is None: return None
-
-    guild_data = {
-        "name": guild.name,
-        "id": guild.id,
-        "prefix": "!"
+# Slash příkaz: Kámen, nůžky, papír
+@bot.tree.command(name="rps", description="Zahraj si kámen, nůžky, papír")
+@app_commands.choices(option=[
+    app_commands.Choice(name="Kámen", value="1"),
+    app_commands.Choice(name="Nůžky", value="2"),
+    app_commands.Choice(name="Papír", value="3"),
+])
+async def rps(interaction: discord.Interaction, option: app_commands.Choice[str]):
+    pc = random.randint(1, 3)
+    outcomes = {
+        ("1", 1): "Kámen vs Kámen\n REMÍZA",
+        ("1", 2): "Kámen vs Nůžky\n VYHRÁL JSI",
+        ("1", 3): "Kámen vs Papír\n PROHRÁL JSI",
+        ("2", 1): "Nůžky vs Kámen\n PROHRÁL JSI",
+        ("2", 2): "Nůžky vs Nůžky\n REMÍZA",
+        ("2", 3): "Nůžky vs Papír\n VYHRÁL JSI",
+        ("3", 1): "Papír vs Kámen\n VYHRÁL JSI",
+        ("3", 2): "Papír vs Nůžky\n PROHRÁL JSI",
+        ("3", 3): "Papír vs Papír\n REMÍZA",
     }
-
-    return guild_data
-
-#kámen, nůžky, papír
-@slash.slash(
-    name="RPS",
-    description="Kámen, nůžky, papír",
-    options=[
-        create_option(
-            name="option",
-            description="Vyber si",
-            required=True,
-            option_type=3,
-            choices=[
-                create_choice(
-                    name="Kámen",
-                    value="1"
-                ),
-                create_choice(
-                    name="Nůžky",
-                    value="2"
-                ),
-                create_choice(
-                    name="Papír",
-                    value="3"
-                )
-            ]
-        )
-    ]
-)
-async def _RPS(ctx:SlashContext, option:str):   #1=kámen 2=nůžky 3=papír
-    pc= random.randint(1,3)
-    if option=="1" and pc==1:
-        await ctx.send("Kámen vs Kámen\n REMÍZA")
-    elif option=="1" and pc==2:
-        await ctx.send("Kámen vs Nůžky\n VYHRÁL JSI")
-    elif option=="1" and pc==3:
-        await ctx.send("Kámen vs Papír\n PROHRÁL JSI")
-    elif option=="2" and pc==1:
-        await ctx.send("Nůžky vs Kámen\n PROHRÁL JSI")
-    elif option=="2" and pc==2:
-        await ctx.send("Nůžky vs Nůžky\n REMÍZA")
-    elif option=="2" and pc==3:
-        await ctx.send("Nůžky vs Papír\n VYHRÁL JSI")
-    elif option=="3" and pc==1:
-        await ctx.send("Papír vs Kámen\n VYHRÁL JSI")
-    elif option=="3" and pc==2:
-        await ctx.send("Papír vs Nůžky\n PROHRÁL JSI")
-    elif option=="3" and pc==3:
-        await ctx.send("Papír vs Papír\n REMÍZA")
-
-#Odkazy
-@slash.slash(
-    name="link",
-    description="Moje odkazy",
-    options=[
-        create_option(
-            name="option",
-            description="Vyber si jaký odkaz chceš",
-            required=True,
-            option_type=3,
-            choices=[
-                create_choice(
-                    name="Twitch",
-                    value="Můj twitch: https://www.twitch.tv/bluecat201"
-                ),
-                create_choice(
-                    name="Support",
-                    value="Zde najdete moji podporu: https://dsc.gg/bluecat | https://discord.gg/43H2HxB3Ax"
-                ),
-                create_choice(
-                    name="Youtube",
-                    value="hl. kanál: https://www.youtube.com/channel/UCwY2CDHkQGmCIwgVgEJKt8w"
-                ),
-                create_choice(
-                    name="Instagram",
-                    value="Můj IG: https://www.instagram.com/bluecat221/"
-                ),
-                create_choice(
-                    name="Web",
-                    value="Můj web: https://bluecat201.weebly.com/"
-                )
-            ]
-        )
-    ]
-)
-async def _link(ctx:SlashContext, option:str):
-    await ctx.send(option)
+    await interaction.response.send_message(outcomes[(option.value, pc)])
 
 
-#Economy
+# Slash příkaz: Odkazy
+@bot.tree.command(name="link", description="Moje odkazy")
+@app_commands.choices(option=[
+    app_commands.Choice(name="Twitch", value="Můj twitch: https://www.twitch.tv/bluecat201"),
+    app_commands.Choice(name="Support", value="Zde najdete moji podporu: https://dsc.gg/bluecat | https://discord.gg/43H2HxB3Ax"),
+    app_commands.Choice(name="Youtube", value="hl. kanál: https://www.youtube.com/channel/UCwY2CDHkQGmCIwgVgEJKt8w"),
+    app_commands.Choice(name="Instagram", value="Můj IG: https://www.instagram.com/bluecat221/"),
+    app_commands.Choice(name="Web", value="Můj web: https://bluecat201.weebly.com/"),
+])
+async def link(interaction: discord.Interaction, option: app_commands.Choice[str]):
+    await interaction.response.send_message(option.value)
 
-mainshop = [{"name":"Hodinky","price":100,"description":"Prostě hodinky"},
-            {"name":"Laptop","price":1000,"description":"Laptop, co víc chceš vědět"},
-            {"name":"PC","price":10000,"description":"Počítač na hraní her"}]
 
-#balance
+# Spuštění bota
+TOKEN = ''
+
+#|non-slash|
+# Example shop
+mainshop = [{"name": "Hodinky", "price": 100, "description": "Prostě hodinky"},
+            {"name": "Laptop", "price": 1000, "description": "Laptop, co víc chceš vědět"},
+            {"name": "PC", "price": 10000, "description": "Počítač na hraní her"}]
+
+# Balance command
 @bot.command(aliases=['bal'])
-async def balance(ctx, member: discord.Member=None):
-    if member==None:
+async def balance(ctx, member: discord.Member = None):
+    if member is None:
         await open_account(ctx.author)
         user = ctx.author
         users = await get_bank_data()
-
         wallet_amt = users[str(user.id)]["wallet"]
         bank_amt = users[str(user.id)]["bank"]
-
-        em = discord.Embed(title = f"{ctx.author.name}'s balance",color = discord.Color.red())
-        em.add_field(name = "Peněženka",value = wallet_amt)
-        em.add_field(name = "Banka",value = bank_amt)
-        await ctx.send(embed = em)
-
+        em = discord.Embed(title=f"{ctx.author.name}'s balance", color=discord.Color.red())
+        em.add_field(name="Peněženka", value=wallet_amt)
+        em.add_field(name="Banka", value=bank_amt)
+        await ctx.send(embed=em)
     else:
         await open_account(member)
         user = member
         users = await get_bank_data()
-
         wallet_amt = users[str(user.id)]["wallet"]
         bank_amt = users[str(user.id)]["bank"]
+        em = discord.Embed(title=f"{member.name}'s balance", color=discord.Color.red())
+        em.add_field(name="Peněženka", value=wallet_amt)
+        em.add_field(name="Banka", value=bank_amt)
+        await ctx.send(embed=em)
 
-        em = discord.Embed(title = f"{member.name}'s balance",color = discord.Color.red())
-        em.add_field(name = "Peněženka",value = wallet_amt)
-        em.add_field(name = "Banka",value = bank_amt)
-        await ctx.send(embed = em)
-
-#beg
+# Beg command
 @bot.event
-async def on_command_error(ctx,error):
-    if isinstance(error, commands.CommandOnCooldown): #kontroluje jestli je na cooldownu
-        cd  = round(error.retry_after)
-        minutes = str(cd//60)
-        seconds = str(cd%60)
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        cd = round(error.retry_after)
+        minutes = str(cd // 60)
+        seconds = str(cd % 60)
         msg = f'**Stále máš cooldown**, prosím zkus to znovu za {minutes}min a {seconds}s'
         await ctx.send(msg)
 
-@bot.command(aliases=['BEG','Beg'])
-@commands.cooldown(1,3600,commands.BucketType.user)
-
+@bot.command(aliases=['BEG', 'Beg'])
+@commands.cooldown(1, 3600, commands.BucketType.user)
 async def beg(ctx):
     await open_account(ctx.author)
-
     users = await get_bank_data()
-
     user = ctx.author
-
     earnings = random.randrange(101)
-
     await ctx.send(f"Někdo ti dal {earnings} korun!!")
-
-
     users[str(user.id)]["wallet"] += earnings
+    with open("mainbank.json", "w") as f:
+        json.dump(users, f)
 
-    with open("mainbank.json","w") as f:
-        json.dump(users,f)
-
-#withdraw
+# Withdraw command
 @bot.command(aliases=['with'])
-async def withdraw(ctx,amount = None):
+async def withdraw(ctx, amount: int = None):
     await open_account(ctx.author)
-
-    if amount == None:
+    if amount is None:
         await ctx.send("Prosím zadejte množství")
         return
-    
     bal = await update_bank(ctx.author)
-
-    amount = int(amount)
-    if amount>bal[1]:
+    if amount > bal[1]:
         await ctx.send("Nemáte tolik peněz v bance")
         return
-    if amount<0:
+    if amount < 0:
         await ctx.send("Hodnota nemůže být záporná")
         return
-    
-    await update_bank(ctx.author,amount)
-    await update_bank(ctx.author,-1*amount,"bank")
-
+    await update_bank(ctx.author, amount)
+    await update_bank(ctx.author, -amount, "bank")
     await ctx.send(f"Vybral jsi {amount} peněz")
 
-#give
-@bot.command(aliases=['Give','GIVE'])
-async def give(ctx,member:discord.Member,amount = None):
+# Give command
+@bot.command(aliases=['Give', 'GIVE'])
+async def give(ctx, member: discord.Member, amount: int = None):
     await open_account(ctx.author)
     await open_account(member)
-
-    if amount == None:
+    if amount is None:
         await ctx.send("Prosím zadejte množství")
         return
-    
     bal = await update_bank(ctx.author)
-
-    amount = int(amount)
-    if amount>bal[1]:
+    if amount > bal[1]:
         await ctx.send("Nemáte tolik peněz")
         return
-    if amount<0:
+    if amount < 0:
         await ctx.send("Hodnota nemůže být záporná")
         return
-    
-    await update_bank(ctx.author,-1*amount,"bank")
-    await update_bank(member,amount,"bank")
-
+    await update_bank(ctx.author, -amount, "bank")
+    await update_bank(member, amount, "bank")
     await ctx.send(f"Dal jsi {amount} peněz")  
 
-#rob
-@bot.command(aliases=['ROB','Rob'])
-@commands.cooldown(1,60,commands.BucketType.user)
-async def rob(ctx,member:discord.Member):
+# Rob command
+@bot.command(aliases=['ROB', 'Rob'])
+@commands.cooldown(1, 60, commands.BucketType.user)
+async def rob(ctx, member: discord.Member):
     await open_account(ctx.author)
     await open_account(member)
-
     bal = await update_bank(member)
-
-    if bal[0]<100:
+    if bal[0] < 100:
         await ctx.send("Nevyplatí se to")
         return
-    
     earnings = random.randrange(0, bal[0])
+    await update_bank(ctx.author, earnings)
+    await update_bank(member, -earnings)
+    await ctx.send(f"Kradl jsi a získal jsi {earnings} peněz")
 
-    await update_bank(ctx.author,earnings)
-    await update_bank(member,-1*earnings)
-
-    await ctx.send(f"Kradl jsi a získal jsi {earnings} peněz")  
-
-#deposite
+# Deposit command
 @bot.command(aliases=['dep'])
-async def deposit(ctx,amount = None):
+async def deposit(ctx, amount: int = None):
     await open_account(ctx.author)
-
-    if amount == None:
+    if amount is None:
         await ctx.send("Prosím zadejte množství")
         return
-    
     bal = await update_bank(ctx.author)
-
-    amount = int(amount)
-    if amount>bal[0]:
+    if amount > bal[0]:
         await ctx.send("Nemáte tolik peněz")
         return
-    if amount<0:
+    if amount < 0:
         await ctx.send("Hodnota nemůže být záporná")
         return
+    await update_bank(ctx.author, -amount)
+    await update_bank(ctx.author, amount, "bank")
+    await ctx.send(f"Uložil jsi {amount} peněz")
 
-    
-    await update_bank(ctx.author,-1*amount)
-    await update_bank(ctx.author,amount,"bank")
-
-    await ctx.send(f"Uložil jsi {amount} peněz")  
-
-#slots
+# Slots command
 @bot.command()
-async def slots(ctx,amount = None):
+async def slots(ctx, amount: int = None):
     await open_account(ctx.author)
-
-    if amount == None:
+    if amount is None:
         await ctx.send("Prosím zadejte množství")
         return
-    
     bal = await update_bank(ctx.author)
-
-    amount = int(amount)
-    if amount>bal[0]:
+    if amount > bal[0]:
         await ctx.send("Nemáte tolik peněz")
         return
-    if amount<0:
+    if amount < 0:
         await ctx.send("Hodnota nemůže být záporná")
         return
-    
-    final = []
-    for i in range(3):
-        a = random.choice(["X","O","Q"])
-
-        final.append(a)
+    final = [random.choice(["X", "O", "Q"]) for _ in range(3)]
     await ctx.send(str(final))
-    
     if final[0] == final[1] and final[1] == final[2]:
-        await update_bank(ctx.author,2*amount)
+        await update_bank(ctx.author, 2 * amount)
         await ctx.send("Vyhrál jsi")
     else:
-        await update_bank(ctx.author,-1*amount)
+        await update_bank(ctx.author, -amount)
         await ctx.send("Prohrál jsi")
 
-#shop
+# Shop command
 @bot.command()
 async def shop(ctx):
-    em = discord.Embed(title = "Shop")
-
+    em = discord.Embed(title="Shop")
     for item in mainshop:
         name = item["name"]
         price = item["price"]
         desc = item["description"]
-        em.add_field(name = name, value = f"{price} | {desc}")
-    
+        em.add_field(name=name, value=f"{price} | {desc}")
     await ctx.send(embed=em)
 
-#buy
+# Buy command
 @bot.command()
-async def buy(ctx,item,amount = 1):
+async def buy(ctx, item: str, amount: int = 1):
     await open_account(ctx.author)
-
-    res = await buy_this(ctx.author,item,amount)
-
+    res = await buy_this(ctx.author, item, amount)
     if not res[0]:
-        if res[1]==1:
+        if res[1] == 1:
             await ctx.send("Tento předmět nemáme")
-            return
-        if res[1]==2:
+        elif res[1] == 2:
             await ctx.send(f"Nemáš dostatek peněz v peněžence aby si koupil {amount} {item}")
 
-#bag
+# Bag command
 @bot.command()
 async def bag(ctx):
     await open_account(ctx.author)
     user = ctx.author
     users = await get_bank_data()
-
-    try:
-        bag = users[str(user.id)]["bag"]
-    except:
-        bag = []
-
-    em = discord.Embed(title = "Bag")
+    bag = users.get(str(user.id), {}).get("bag", [])
+    em = discord.Embed(title="Bag")
     for item in bag:
         name = item["item"]
         amount = item["amount"]
+        em.add_field(name=name, value=amount)
+    await ctx.send(embed=em)
 
-        em.add_field(name = name, value = amount)
-
-    await ctx.send(embed = em)
-
-async def buy_this(user,item_name,amount):
+# Helper function for buying items
+async def buy_this(user, item_name, amount):
     item_name = item_name.lower()
     name_ = None
     for item in mainshop:
@@ -446,19 +291,13 @@ async def buy_this(user,item_name,amount):
             name_ = name
             price = item["price"]
             break
-    
-    if name_ == None:
-        return [False,1]
-
-    cost = price*amount
-    
+    if name_ is None:
+        return [False, 1]
+    cost = price * amount
     users = await get_bank_data()
-
     bal = await update_bank(user)
-
-    if bal[0]<cost:
-        return [False,2]
-    
+    if bal[0] < cost:
+        return [False, 2]
     try:
         index = 0
         t = None
@@ -470,70 +309,62 @@ async def buy_this(user,item_name,amount):
                 users[str(user.id)]["bag"][index]["amount"] = new_amt
                 t = 1
                 break
-            index+=1
-        if t == None:
-            obj = {"item":item_name, "amount":amount}
+            index += 1
+        if t is None:
+            obj = {"item": item_name, "amount": amount}
             users[str(user.id)]["bag"].append(obj)
     except:
-        obj = {"item":item_name, "amount":amount}
+        obj = {"item": item_name, "amount": amount}
         users[str(user.id)]["bag"] = [obj]
+    with open("mainbank.json", "w") as f:
+        json.dump(users, f)
+    await update_bank(user, -cost, "wallet")
+    return [True, "Worked"]
 
-    with open("mainbank.json","w") as f:
-        json.dump(users,f)
-
-    await update_bank(user,cost*-1,"wallet")
-    return [True,"Worked"]
-
+# Helper function for creating accounts
 async def open_account(user):
     users = await get_bank_data()
-
     if str(user.id) in users:
         return False
     else:
-        users[str(user.id)] = {}
-        users[str(user.id)]["wallet"] = 0
-        users[str(user.id)]["bank"] = 0
-
-    with open("mainbank.json","w") as f:
-        json.dump(users,f)
+        users[str(user.id)] = {"wallet": 0, "bank": 0, "bag": []}
+    with open("mainbank.json", "w") as f:
+        json.dump(users, f)
     return True
 
+# Helper function for getting bank data
 async def get_bank_data():
-    with open("mainbank.json","r") as f:
-        users = json.load(f)
+    with open("mainbank.json", "r") as f:
+        return json.load(f)
 
-    return users
-
-async def update_bank(user,change = 0,mode = "wallet"):
+# Helper function for updating bank balances
+async def update_bank(user, change=0, mode="wallet"):
     users = await get_bank_data()
-
     users[str(user.id)][mode] += change
+    with open("mainbank.json", "w") as f:
+        json.dump(users, f)
+    return [users[str(user.id)]["wallet"], users[str(user.id)]["bank"]]
 
-    with open("mainbank.json","w") as f:
-        json.dump(users,f)
-    
-    bal = [users[str(user.id)]["wallet"],users[str(user.id)]["bank"]]
-    return bal
 
 #NORMAL COMMANDS
 #ban
-@bot.command(aliases=['Ban','BAN'])
-@commands.has_permissions(ban_members=True) #oprávnění na ban?
-async def ban(ctx, member : discord.User = None, *, reason=None):
-
-    if member is None: 
+@bot.command(aliases=['Ban', 'BAN'])
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, member: discord.User = None, *, reason=None):
+    if member is None:
         await ctx.send("Prosím zadejte ID#discriminator k banu")
-    if member == ctx.message.author:
-        await ctx.channel.send("Nemůžeš zabanovat sám sebe")
+    if member == ctx.author:
+        await ctx.send("Nemůžeš zabanovat sám sebe")
     else:
         await member.ban(reason=reason)
         await ctx.send(f'{member.mention} byl zabanován z důvodu: {reason}.')
 
-#Nemá oprávnění na ban
+#ban error
 @ban.error
 async def ban_error(ctx, error):
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít opravnění **Zabanovat uživatele**.")
+    if isinstance(error, MissingPermissions):
+        await ctx.send("Omlouvám se ale pro použití tohoto commandu potřebuješ mít oprávnění **Zabanovat uživatele**.")
+
 
 #bluecat
 @bot.command(aliases=['Bluecat','BLUECAT'])
@@ -550,49 +381,30 @@ async def bluecat(ctx):
 async def d(ctx):
     await ctx.send("<:cicisrdicko:849285560832360531>")
 
+
 #help
 @bot.command()
-async def help(ctx):
-    embed=discord.Embed(title="Help",description="1 - Základní commandy\n 2 - Roleplay commandy\n 3 - Slash commands\n 4 - Economy commands", color=0x000000)
-    one = Button(style=ButtonStyle.blue,label="1",id="embed1")
-    two = Button(style=ButtonStyle.blue,label="2",id="embed2")
-    three = Button(style=ButtonStyle.blue,label="3",id="embed3")
-    four = Button(style=ButtonStyle.blue,label="4",id="embed4")
-    invite = Button(style=ButtonStyle.URL,label="Invite zde", url="https://discord.com/api/oauth2/authorize?client_id=883325865474269192&permissions=8&scope=bot%20applications.commands")
+async def helps(ctx):
+    embed = discord.Embed(title="Help", description="1 - Základní commandy\n 2 - Roleplay commandy\n 3 - Slash commands\n 4 - Economy commands", color=0x000000)
+    one = Button(label="1", style=discord.ButtonStyle.primary)
+    two = Button(label="2", style=discord.ButtonStyle.primary)
+    three = Button(label="3", style=discord.ButtonStyle.primary)
+    four = Button(label="4", style=discord.ButtonStyle.primary)
+    invite = Button(label="Invite zde", url="https://discord.com/api/oauth2/authorize?client_id=883325865474269192&permissions=8&scope=bot%20applications.commands", style=discord.ButtonStyle.link)
 
-    embed1 = discord.Embed(title="1 - Základní commandy", description="ban - Zabanování uživatele\n bluecat - random bluecat gif\n help - tohle\n info - Info o botovi\n invite - Invite na bota\n kick - kick uživatele\nmute - dá uživateli muted roli buď na nějakou dobu, nebo dokud nepoužije unmute\n ping - latence bota\npurge - smaže určitý počet zpráv\n setprefix - Nastavení prefixu bota, jen pro **Administratory**\n sudo - mluvení za bota, jen pro **Administrátory**\n support - Invite na server majitele bota, kde najedete podporu bota\n twitch - Odkaz na twitch majitele\n unban - Unban uživatele\n unmute - odeberele uživately mute\n warn - varování uživatele\n warnings - výpis varování uživatele", color=0x000000)
-    embed2 = discord.Embed(title="2 - Roleplay commandy", description="Výpis roleplay commandů: bite,blush,bored,cry,cuddle,dance,facepalm,feed,happy,highfive,hug,kiss,laugh,pat,\npoke,pout,shrug,slap,sleep,smile,smug,stare,think,thumbsup,tickle,wave,wink", ccolor=0x000000)
-    embed3 = discord.Embed(title="3 - Slash commandy", description="RPS - hra kámen, nůžky, papír s pc\n Linky - Odkazy na soc sítě majitele bota", color=0x000000)
-    embed4 = discord.Embed(title="4 - Economy commandy", description="balance - zobrazení účtu\nbeg - příjem peněz\n withdraw - vybrat peníze z banky\ngive - daruj někomu peníže\n rob - okraď někoho o peníze\n deposite - ulož peníze do banky\n slots - automaty\n shop - obchod s věcmi\n buy - kup nějakou věc z shopu\n bag - seznam vlastněných věcí", color=0x000000)
+    embed1 = discord.Embed(title="1 - Základní commandy", description="ban - Zabanování uživatele", color=0x000000)
+    embed2 = discord.Embed(title="2 - Roleplay commandy", description="Výpis roleplay commandů", color=0x000000)
+    embed3 = discord.Embed(title="3 - Slash commandy", description="RPS - hra", color=0x000000)
+    embed4 = discord.Embed(title="4 - Economy commandy", description="balance - zobrazení účtu", color=0x000000)
 
-    await ctx.send(embed=embed,components=[[one,two,three,four],[invite]])
+    view = View()
+    view.add_item(one)
+    view.add_item(two)
+    view.add_item(three)
+    view.add_item(four)
+    view.add_item(invite)
 
-    buttons = {
-        "embed1": embed1,
-        "embed2": embed2,
-        "embed3": embed3,
-        "embed4": embed4
-    }
-    
-    while True:
-        print("1")
-        event = await bot.wait_for("button_click")     #aby to bralo jen stisknutí talčítka v té samé guildě, ve které byl poslán příkaz
-        print("2")
-        if event.channel is not ctx.channel:
-            print("3")
-            return
-        if event.channel == ctx.channel:
-            print("4")
-            response = buttons.get(event.component.id)
-            print("5")
-            if response is None:
-                await event.channel.send(
-                    "Něco se pokazilo. Zkuste to prosím znovu"
-                )
-            if event.channel == ctx.channel:
-                print("6")
-                await event.send(embed=response)
-                print("7")
+    await ctx.send(embed=embed, view=view)
 
 
 #info
@@ -617,6 +429,7 @@ async def kick(ctx, member : discord.Member, *, reason=None):
 async def kick_error(ctx, error):
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("Omlouvám se, ale pokud chcete použít tenhle command musíte mít oprávnění **vyhodit uživatele**.")
+
 
 #unmute
 @bot.command()
@@ -1163,5 +976,5 @@ async def on_message_delete(message):
     channel = str(message.channel.name)
     print(f'Zpráva "{zprava}" od {username} v roomce {channel} na serveru {server} byla smazána')
 
-bot.ipc.start()
+#bot.ipc.start()
 bot.run(TOKEN)
