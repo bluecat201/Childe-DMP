@@ -1,4 +1,5 @@
 import discord
+import aiohttp
 from discord.ext import commands, tasks
 import random
 import json
@@ -36,7 +37,7 @@ bot.warnings = {}  # guild_id : {member_id: [count, [(admin_id, reason)]]}
 async def on_ready():
     print(f'Connected to bot: {bot.user.name}')
     print(f'Bot ID: {bot.user.id}')
-    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.5', url='https://www.twitch.tv/Bluecat201'))
+    await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.6', url='https://www.twitch.tv/Bluecat201'))
     # Inicializace varování
     for guild in bot.guilds:
         bot.warnings[guild.id] = {}
@@ -372,7 +373,7 @@ async def bluecat(ctx):
     nah = random.randint(1,20)
     await ctx.message.delete()
     embed=discord.Embed(color=0x0B0B45)
-    file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/Bluecat/{nah}.gif", filename=f"image.gif")
+    file = discord.File(f"C:/Users/Elitebook/Desktop/Childe/Childe-DMP/bluecat/{nah}.gif", filename=f"image.gif")
     embed.set_image(url=f"attachment://image.gif")
     await ctx.send(file=file, embed=embed)
 
@@ -382,35 +383,10 @@ async def d(ctx):
     await ctx.send("<:cicisrdicko:849285560832360531>")
 
 
-#help
-@bot.command()
-async def helps(ctx):
-    embed = discord.Embed(title="Help", description="1 - Základní commandy\n 2 - Roleplay commandy\n 3 - Slash commands\n 4 - Economy commands", color=0x000000)
-    one = Button(label="1", style=discord.ButtonStyle.primary)
-    two = Button(label="2", style=discord.ButtonStyle.primary)
-    three = Button(label="3", style=discord.ButtonStyle.primary)
-    four = Button(label="4", style=discord.ButtonStyle.primary)
-    invite = Button(label="Invite zde", url="https://discord.com/api/oauth2/authorize?client_id=883325865474269192&permissions=8&scope=bot%20applications.commands", style=discord.ButtonStyle.link)
-
-    embed1 = discord.Embed(title="1 - Základní commandy", description="ban - Zabanování uživatele", color=0x000000)
-    embed2 = discord.Embed(title="2 - Roleplay commandy", description="Výpis roleplay commandů", color=0x000000)
-    embed3 = discord.Embed(title="3 - Slash commandy", description="RPS - hra", color=0x000000)
-    embed4 = discord.Embed(title="4 - Economy commandy", description="balance - zobrazení účtu", color=0x000000)
-
-    view = View()
-    view.add_item(one)
-    view.add_item(two)
-    view.add_item(three)
-    view.add_item(four)
-    view.add_item(invite)
-
-    await ctx.send(embed=embed, view=view)
-
-
 #info
 @bot.command(aliases=['Info','INFO'])
 async def info(ctx):
-    await ctx.send(f"Bot vzniká jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nPlánované vydaní plné verze bota: ||25.3.2022|| \nNaprogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.5 \nDeveloper: 𝓑𝓵𝓾𝓮𝓬𝓪𝓽#1973")
+    await ctx.send(f"Bot vznikal jako moje dlouhodobá maturitní práce :)\nDatum vydání první alpha verze: 5.9.2021 \nDatum vydání první beta verze: 30.9.2021\nNaprogramováno v pythonu \nPokud máte jakékoliv poznámky, rady či nápady pro bota, můžete je napsat na !support server. ;)\nPočet serverů, na kterých jsem: {len(bot.guilds)}\nVerze bota: Beta 0.2.6 \nDeveloper: Bluecat201")
 
 #invite bota
 @bot.command(aliases=['Invite','INVITE'])
@@ -638,283 +614,213 @@ async def warnings(ctx, member: discord.Member=None):
 
 #|Roleplay|
 
+# Obecná funkce pro příkazy
+async def fetch_neko_action(ctx, description, endpoint, member=None):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"https://nekos.best/api/v2/{endpoint}") as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                image_url = data["results"][0]["url"]
+                embed = discord.Embed(description=description, color=0xadd8e6)
+                embed.set_image(url=image_url)
+                await ctx.message.delete()
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send("Nepodařilo se získat data z API. Zkuste to prosím znovu.")
+
 #bite
-@bot.command(aliases=['Bite','BITE'])
-async def bite(ctx,member : discord.User = None):
+@bot.command(aliases=['Bite', 'BITE'])
+async def bite(ctx, member: discord.User = None):
     if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
+        await ctx.send("Musíš někoho označit/zadat ID")
     else:
-        nah = random.randint(1,13)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} kouše {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/public/bite/{nah:03}.gif")
-        await ctx.send(embed=embed)
+        description = f"{ctx.author.mention} kouše {member.mention}"
+        await fetch_neko_action(ctx, description, "bite")
 
 #blush
-@bot.command(aliases=['Blush','BLUSH'])
+@bot.command(aliases=['Blush', 'BLUSH'])
 async def blush(ctx):
-    nah = random.randint(1,13)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} se červená",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/blush/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} se červená"
+    await fetch_neko_action(ctx, description, "blush")
 
 #bored
 @bot.command(aliases=['Bored','BORED'])
 async def bored(ctx):
-    nah = random.randint(1,15)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} se nudí",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/bored/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} se nudí"
+    await fetch_neko_action(ctx, description, "bored")
 
 #cry
 @bot.command(aliases=['Cry','CRY'])
 async def cry(ctx):
-    nah = random.randint(1,40)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} brečí",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/cry/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} brečí"
+    await fetch_neko_action(ctx, description, "cry")
 
 #cuddle
-@bot.command(aliases=['Cuddle','CUDDLE'])
-async def cuddle(ctx,member : discord.User = None):
+@bot.command(aliases=['Cuddle', 'CUDDLE'])
+async def cuddle(ctx, member: discord.User = None):
     if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
+        await ctx.send("Musíš někoho označit/zadat ID")
     else:
-        nah = random.randint(1,28)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} se mazlí s {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/public/cuddle/{nah:03}.gif")
-        await ctx.send(embed=embed)
+        description = f"{ctx.author.mention} se mazlí s {member.mention}"
+        await fetch_neko_action(ctx, description, "cuddle")
 
 #dance
-@bot.command(aliases=['Dance','DANCE'])
 async def dance(ctx):
-    nah = random.randint(1,21)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} tancuje",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/dance/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} tancuje"
+    await fetch_neko_action(ctx, description, "dance")
 
 #facepalm
 @bot.command(aliases=['Facepalm','FACEPALM'])
 async def facepalm(ctx):
-    nah = random.randint(1,11)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} facepalm",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/facepalm/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} si dává facepalm"
+    await fetch_neko_action(ctx, description, "facepalm")
 
 #feed
 @bot.command(aliases=['Feed','FEED'])
 async def feed(ctx,member : discord.User = None):
     if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
+        await ctx.send("Musíš někoho označit/zadat ID")
     else:
-        nah = random.randint(1,23)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} krmí {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/public/feed/{nah:03}.gif")
-        await ctx.send(embed=embed)
+        description = f"{ctx.author.mention} krmí {member.mention}"
+        await fetch_neko_action(ctx, description, "feed")
 
 #happy
 @bot.command(aliases=['Happy','HAPPY'])
 async def happy(ctx):
-    nah = random.randint(1,12)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} je šťastný",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/happy/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} je šťastný"
+    await fetch_neko_action(ctx, description, "happy")
 
 #highfive
 @bot.command(aliases=['Highfive','HIGHFIVE'])
 async def highfive(ctx,member : discord.User = None):
     if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
+        await ctx.send("Musíš někoho označit/zadat ID")
     else:
-        nah = random.randint(1,13)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} highfive {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/public/highfive/{nah:03}.gif")
-        await ctx.send(embed=embed)
+        description = f"{ctx.author.mention} si dává highfive s {member.mention}"
+        await fetch_neko_action(ctx, description, "highfive")
 
 #hug
 @bot.command(aliases=['Hug','HUG'])
 async def hug(ctx,member : discord.User = None):
     if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
+        await ctx.send("Musíš někoho označit/zadat ID")
     else:
-        nah = random.randint(1,100)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} objímá {member.mention}", color=0xadd8e6)
-        file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/hug/{nah}.gif", filename=f"image.gif")
-        embed.set_image(url=f"attachment://image.gif")
-        await ctx.send(file=file, embed=embed)
+        description = f"{ctx.author.mention} objímá {member.mention}"
+        await fetch_neko_action(ctx, description, "hug")
 
 #kiss
 @bot.command(aliases=['Kiss','KISS'])
 async def kiss(ctx,member : discord.User = None):
     if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
+        await ctx.send("Musíš někoho označit/zadat ID")
     else:
-        nah = random.randint(1,100)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} líbá {member.mention}", color=0xadd8e6)
-        file = discord.File(f"C:/Users/User/Desktop/škola/DMP/Childe-DMP/kiss/{nah}.gif", filename=f"image.gif")
-        embed.set_image(url=f"attachment://image.gif")
-        await ctx.send(file=file, embed=embed)
+        description = f"{ctx.author.mention} líbá {member.mention}"
+        await fetch_neko_action(ctx, description, "kiss")
 
 #laugh
 @bot.command(aliases=['Laugh','LAUGH'])
 async def laugh(ctx):
-    nah = random.randint(1,19)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} se směje",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/laugh/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} se směje"
+    await fetch_neko_action(ctx, description, "laugh")
 
 #pat
 @bot.command(aliases=['Pat','PAT'])
 async def pat(ctx,member : discord.User = None):
     if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
+        await ctx.send("Musíš někoho označit/zadat ID")
     else:
-        nah = random.randint(1,38)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} hladí {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/public/pat/{nah:03}.gif")
-        await ctx.send(embed=embed)
+        description = f"{ctx.author.mention} hladí {member.mention}"
+        await fetch_neko_action(ctx, description, "pat")
 
 #poke
 @bot.command(aliases=['Poke','POKE'])
 async def poke(ctx,member : discord.User = None):
     if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
+        await ctx.send("Musíš někoho označit/zadat ID")
     else:
-        nah = random.randint(1,21)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} strká {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/public/poke/{nah:03}.gif")
-        await ctx.send(embed=embed)
+        description = f"{ctx.author.mention} strká {member.mention}"
+        await fetch_neko_action(ctx, description, "poke")
 
 #pout
 @bot.command(aliases=['Pout','POUT'])
 async def pout(ctx):
-    nah = random.randint(1,8)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} pout",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/pout/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} se mračí"
+    await fetch_neko_action(ctx, description, "pout")
 
 #shrug
 @bot.command(aliases=['Shrug','SHRUG'])
 async def shrug(ctx):
-    nah = random.randint(1,8)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} krčí rameny",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/shrug/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} krčí rameny"
+    await fetch_neko_action(ctx, description, "shrug")
 
 #slap
-@bot.command(aliases=['Slap','SLAP'])
-async def slap(ctx,member : discord.User = None):
+@bot.command(aliases=['Slap', 'SLAP'])
+async def slap(ctx, member: discord.User = None):
     if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
+        await ctx.send("Musíš někoho označit/zadat ID")
     else:
-        nah = random.randint(1,31)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} dává facku {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/public/slap/{nah:03}.gif")
-        await ctx.send(embed=embed)
+        description = f"{ctx.author.mention} dává facku {member.mention}"
+        await fetch_neko_action(ctx, description, "slap")
 
 #sleep
 @bot.command(aliases=['Sleep','SLEEP'])
 async def sleep(ctx):
-    nah = random.randint(1,12)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} spí",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/sleep/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} spí"
+    await fetch_neko_action(ctx, description, "sleep")
 
 #smile
 @bot.command(aliases=['Smile','SMILE'])
 async def smile(ctx):
-    nah = random.randint(1,23)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} usmívá se",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/smile/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} usmívá se"
+    await fetch_neko_action(ctx, description, "smile")
 
 #smug
 @bot.command(aliases=['Smug','SMUG'])
 async def smug(ctx):
-    nah = random.randint(1,15)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} smug",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/smug/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} je samolibý"
+    await fetch_neko_action(ctx, description, "smug")
 
 #stare
 @bot.command(aliases=['Stare','STARE'])
 async def stare(ctx,member : discord.User = None):
     if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
+        await ctx.send("Musíš někoho označit/zadat ID")
     else:
-        nah = random.randint(1,14)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} civí na {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/public/stare/{nah:03}.gif")
-        await ctx.send(embed=embed)
+        description = f"{ctx.author.mention} civí na {member.mention}"
+        await fetch_neko_action(ctx, description, "stare")
 
 #think
 @bot.command(aliases=['Think','THINK'])
 async def think(ctx):
-    nah = random.randint(1,11)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} přemýšlí",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/think/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} přemýšlí"
+    await fetch_neko_action(ctx, description, "think")
 
 #thumbsup
 @bot.command(aliases=['Thumbsup','THUMBSUP'])
 async def thumbsup(ctx):
-    nah = random.randint(1,16)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} thumbsup",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/thumbsup/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} dává palec nahoru"
+    await fetch_neko_action(ctx, description, "thumbsup")
 
 #tickle
 @bot.command(aliases=['Tickle','TICKLE'])
 async def tickle(ctx,member : discord.User = None):
     if member is None:
-        await ctx.send('Musíš někoho označit/zadat ID')
+        await ctx.send("Musíš někoho označit/zadat ID")
     else:
-        nah = random.randint(1,21)
-        await ctx.message.delete()
-        embed=discord.Embed(description=f"{ctx.author.mention} lechtá {member.mention}",color=0xadd8e6)
-        embed.set_image(url=f"https://nekos.best/public/tickle/{nah:03}.gif")
-        await ctx.send(embed=embed)
+        description = f"{ctx.author.mention} lechtá {member.mention}"
+        await fetch_neko_action(ctx, description, "tickle")
 
 #wave
 @bot.command(aliases=['Wave','WAVE'])
 async def wave(ctx):
-    nah = random.randint(1,27)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} mává",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/wave/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} mává"
+    await fetch_neko_action(ctx, description, "wave")
 
 #wink
 @bot.command(aliases=['Wink','WINK'])
 async def wink(ctx):
-    nah = random.randint(1,15)
-    await ctx.message.delete()
-    embed=discord.Embed(description=f"{ctx.author.mention} mrká",color=0xadd8e6)
-    embed.set_image(url=f"https://nekos.best/public/wink/{nah:03}.gif")
-    await ctx.send(embed=embed)
+    description = f"{ctx.author.mention} mrká"
+    await fetch_neko_action(ctx, description, "wink")
   
 #|výstup do konzole|
 
