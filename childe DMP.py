@@ -8,6 +8,7 @@ import asyncio
 from discord.ui import Button, View
 from discord import app_commands
 from discord.ext.commands import MissingPermissions
+from roleplay import Roleplay
 import aiofiles
 
 
@@ -32,12 +33,14 @@ intents.members = True
 bot = commands.Bot(command_prefix=determine_prefix, intents=intents)
 bot.warnings = {}  # guild_id : {member_id: [count, [(admin_id, reason)]]}
 
+
 # Event: Bot je připraven
 @bot.event
 async def on_ready():
     print(f'Connected to bot: {bot.user.name}')
     print(f'Bot ID: {bot.user.id}')
     await bot.change_presence(activity=discord.Streaming(name='Beta v0.2.6', url='https://www.twitch.tv/Bluecat201'))
+    await bot.add_cog(Roleplay(bot))
     # Inicializace varování
     for guild in bot.guilds:
         bot.warnings[guild.id] = {}
@@ -612,216 +615,6 @@ async def warnings(ctx, member: discord.Member=None):
     except KeyError: #no warnings
         await ctx.send("Tento uživatel nemá žádné warny") 
 
-#|Roleplay|
-
-# Obecná funkce pro příkazy
-async def fetch_neko_action(ctx, description, endpoint, member=None):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f"https://nekos.best/api/v2/{endpoint}") as resp:
-            if resp.status == 200:
-                data = await resp.json()
-                image_url = data["results"][0]["url"]
-                embed = discord.Embed(description=description, color=0xadd8e6)
-                embed.set_image(url=image_url)
-                await ctx.message.delete()
-                await ctx.send(embed=embed)
-            else:
-                await ctx.send("Nepodařilo se získat data z API. Zkuste to prosím znovu.")
-
-#bite
-@bot.command(aliases=['Bite', 'BITE'])
-async def bite(ctx, member: discord.User = None):
-    if member is None:
-        await ctx.send("Musíš někoho označit/zadat ID")
-    else:
-        description = f"{ctx.author.mention} kouše {member.mention}"
-        await fetch_neko_action(ctx, description, "bite")
-
-#blush
-@bot.command(aliases=['Blush', 'BLUSH'])
-async def blush(ctx):
-    description = f"{ctx.author.mention} se červená"
-    await fetch_neko_action(ctx, description, "blush")
-
-#bored
-@bot.command(aliases=['Bored','BORED'])
-async def bored(ctx):
-    description = f"{ctx.author.mention} se nudí"
-    await fetch_neko_action(ctx, description, "bored")
-
-#cry
-@bot.command(aliases=['Cry','CRY'])
-async def cry(ctx):
-    description = f"{ctx.author.mention} brečí"
-    await fetch_neko_action(ctx, description, "cry")
-
-#cuddle
-@bot.command(aliases=['Cuddle', 'CUDDLE'])
-async def cuddle(ctx, member: discord.User = None):
-    if member is None:
-        await ctx.send("Musíš někoho označit/zadat ID")
-    else:
-        description = f"{ctx.author.mention} se mazlí s {member.mention}"
-        await fetch_neko_action(ctx, description, "cuddle")
-
-#dance
-async def dance(ctx):
-    description = f"{ctx.author.mention} tancuje"
-    await fetch_neko_action(ctx, description, "dance")
-
-#facepalm
-@bot.command(aliases=['Facepalm','FACEPALM'])
-async def facepalm(ctx):
-    description = f"{ctx.author.mention} si dává facepalm"
-    await fetch_neko_action(ctx, description, "facepalm")
-
-#feed
-@bot.command(aliases=['Feed','FEED'])
-async def feed(ctx,member : discord.User = None):
-    if member is None:
-        await ctx.send("Musíš někoho označit/zadat ID")
-    else:
-        description = f"{ctx.author.mention} krmí {member.mention}"
-        await fetch_neko_action(ctx, description, "feed")
-
-#happy
-@bot.command(aliases=['Happy','HAPPY'])
-async def happy(ctx):
-    description = f"{ctx.author.mention} je šťastný"
-    await fetch_neko_action(ctx, description, "happy")
-
-#highfive
-@bot.command(aliases=['Highfive','HIGHFIVE'])
-async def highfive(ctx,member : discord.User = None):
-    if member is None:
-        await ctx.send("Musíš někoho označit/zadat ID")
-    else:
-        description = f"{ctx.author.mention} si dává highfive s {member.mention}"
-        await fetch_neko_action(ctx, description, "highfive")
-
-#hug
-@bot.command(aliases=['Hug','HUG'])
-async def hug(ctx,member : discord.User = None):
-    if member is None:
-        await ctx.send("Musíš někoho označit/zadat ID")
-    else:
-        description = f"{ctx.author.mention} objímá {member.mention}"
-        await fetch_neko_action(ctx, description, "hug")
-
-#kiss
-@bot.command(aliases=['Kiss','KISS'])
-async def kiss(ctx,member : discord.User = None):
-    if member is None:
-        await ctx.send("Musíš někoho označit/zadat ID")
-    else:
-        description = f"{ctx.author.mention} líbá {member.mention}"
-        await fetch_neko_action(ctx, description, "kiss")
-
-#laugh
-@bot.command(aliases=['Laugh','LAUGH'])
-async def laugh(ctx):
-    description = f"{ctx.author.mention} se směje"
-    await fetch_neko_action(ctx, description, "laugh")
-
-#pat
-@bot.command(aliases=['Pat','PAT'])
-async def pat(ctx,member : discord.User = None):
-    if member is None:
-        await ctx.send("Musíš někoho označit/zadat ID")
-    else:
-        description = f"{ctx.author.mention} hladí {member.mention}"
-        await fetch_neko_action(ctx, description, "pat")
-
-#poke
-@bot.command(aliases=['Poke','POKE'])
-async def poke(ctx,member : discord.User = None):
-    if member is None:
-        await ctx.send("Musíš někoho označit/zadat ID")
-    else:
-        description = f"{ctx.author.mention} strká {member.mention}"
-        await fetch_neko_action(ctx, description, "poke")
-
-#pout
-@bot.command(aliases=['Pout','POUT'])
-async def pout(ctx):
-    description = f"{ctx.author.mention} se mračí"
-    await fetch_neko_action(ctx, description, "pout")
-
-#shrug
-@bot.command(aliases=['Shrug','SHRUG'])
-async def shrug(ctx):
-    description = f"{ctx.author.mention} krčí rameny"
-    await fetch_neko_action(ctx, description, "shrug")
-
-#slap
-@bot.command(aliases=['Slap', 'SLAP'])
-async def slap(ctx, member: discord.User = None):
-    if member is None:
-        await ctx.send("Musíš někoho označit/zadat ID")
-    else:
-        description = f"{ctx.author.mention} dává facku {member.mention}"
-        await fetch_neko_action(ctx, description, "slap")
-
-#sleep
-@bot.command(aliases=['Sleep','SLEEP'])
-async def sleep(ctx):
-    description = f"{ctx.author.mention} spí"
-    await fetch_neko_action(ctx, description, "sleep")
-
-#smile
-@bot.command(aliases=['Smile','SMILE'])
-async def smile(ctx):
-    description = f"{ctx.author.mention} usmívá se"
-    await fetch_neko_action(ctx, description, "smile")
-
-#smug
-@bot.command(aliases=['Smug','SMUG'])
-async def smug(ctx):
-    description = f"{ctx.author.mention} je samolibý"
-    await fetch_neko_action(ctx, description, "smug")
-
-#stare
-@bot.command(aliases=['Stare','STARE'])
-async def stare(ctx,member : discord.User = None):
-    if member is None:
-        await ctx.send("Musíš někoho označit/zadat ID")
-    else:
-        description = f"{ctx.author.mention} civí na {member.mention}"
-        await fetch_neko_action(ctx, description, "stare")
-
-#think
-@bot.command(aliases=['Think','THINK'])
-async def think(ctx):
-    description = f"{ctx.author.mention} přemýšlí"
-    await fetch_neko_action(ctx, description, "think")
-
-#thumbsup
-@bot.command(aliases=['Thumbsup','THUMBSUP'])
-async def thumbsup(ctx):
-    description = f"{ctx.author.mention} dává palec nahoru"
-    await fetch_neko_action(ctx, description, "thumbsup")
-
-#tickle
-@bot.command(aliases=['Tickle','TICKLE'])
-async def tickle(ctx,member : discord.User = None):
-    if member is None:
-        await ctx.send("Musíš někoho označit/zadat ID")
-    else:
-        description = f"{ctx.author.mention} lechtá {member.mention}"
-        await fetch_neko_action(ctx, description, "tickle")
-
-#wave
-@bot.command(aliases=['Wave','WAVE'])
-async def wave(ctx):
-    description = f"{ctx.author.mention} mává"
-    await fetch_neko_action(ctx, description, "wave")
-
-#wink
-@bot.command(aliases=['Wink','WINK'])
-async def wink(ctx):
-    description = f"{ctx.author.mention} mrká"
-    await fetch_neko_action(ctx, description, "wink")
-  
 #|výstup do konzole|
 
 #logace připojení uživatele
@@ -881,6 +674,7 @@ async def on_message_delete(message):
     server = str(message.guild.name)
     channel = str(message.channel.name)
     print(f'Zpráva "{zprava}" od {username} v roomce {channel} na serveru {server} byla smazána')
+
 
 #bot.ipc.start()
 bot.run(TOKEN)
